@@ -1,5 +1,6 @@
 import type { DataItem, Time } from '../types';
 import dayjs from 'dayjs';
+import { defaultPrefixCls } from '../config';
 
 const isTimeRange = (time: DataItem['time']): time is [Time, Time] =>
   Array.isArray(time) && time.length === 2;
@@ -84,3 +85,9 @@ export function calculateTimeRange(data: DataItem[], options: CalculateTimeRange
     endTime: trimmedEndTime
   };
 }
+
+export function defaultGetPrefixCls(suffixCls?: string, customizePrefixCls?: string) {
+  if (customizePrefixCls) return customizePrefixCls;
+
+  return suffixCls ? `${defaultPrefixCls}-${suffixCls}` : defaultPrefixCls;
+};
