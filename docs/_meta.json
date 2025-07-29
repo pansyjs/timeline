@@ -5,9 +5,9 @@
     "activeMatch": "/guide/"
   },
   {
-    "text": "Hello world",
-    "link": "/hello/",
-    "activeMatch": "/hello/"
+    "text": "示例",
+    "link": "/demo/",
+    "activeMatch": "/demo/"
   },
   {
     "text": "API",

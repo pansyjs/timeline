@@ -2,16 +2,15 @@
 pageType: home
 
 hero:
-  name: My Site
-  text: A cool website!
-  tagline: This is the tagline
+  name: TimeLine
+  text: 故事时间线组件
   actions:
     - theme: brand
       text: Quick Start
       link: /guide/
     - theme: alt
       text: GitHub
-      link: https://github.com/web-infra-dev/rspress
+      link: https://github.com/pansyjs/timeline
   image:
     src: /rspress-icon.png
     alt: Logo
