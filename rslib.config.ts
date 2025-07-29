@@ -1,33 +1,47 @@
+import * as path from 'node:path';
 import { defineConfig } from '@rslib/core';
-import { pluginReact } from '@rsbuild/plugin-react';
-import { pluginLess } from '@rsbuild/plugin-less';;
+import { pluginReact } from '@rsbuild/plugin-react';;
 
 export default defineConfig({
   source: {
     entry: {
       index: [
         './src/**',
-        '!./src/**/*.test.ts',
+        '!src/**/*.less',
+        '!src/**/*.test.ts',
       ],
     },
     tsconfigPath: './tsconfig.build.json',
+  },
+  output: {
+    target: 'web',
+    copy: [
+      { from: '**/*.less', context: path.join(__dirname, 'src') }
+    ],
   },
   lib: [
     {
       bundle: false,
       format: 'cjs',
+      redirect: {
+        style: {
+          extension: false,
+        },
+      },
     },
     {
       bundle: false,
       dts: true,
       format: 'esm',
+      redirect: {
+        style: {
+          extension: false,
+        },
+      },
     },
   ],
-  output: {
-    target: 'web',
-  },
   plugins: [
     pluginReact(),
-    pluginLess(),
+    // pluginLess(),
   ],
 });
