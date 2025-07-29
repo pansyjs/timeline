@@ -1,5 +1,5 @@
 {
-  "name": "timeline",
+  "name": "@pansy/timeline",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -16,6 +16,10 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^18.11.17",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "rspress": "^1.40.2"
   }
 }
