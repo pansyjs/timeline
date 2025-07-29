@@ -1,7 +1,23 @@
 {
   "name": "@pansy/timeline",
   "version": "1.0.0",
-  "private": true,
+  "sideEffects": [
+    "*.less"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "rslib build",
     "dev": "rslib build --watch",

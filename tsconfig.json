@@ -15,10 +15,11 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
-      "@pansy/timeline": ["src/*"]
+      "@pansy/timeline": ["src"],
+      "@pansy/timeline/*": ["src/*"] // 支持子路径
     }
   },
-  "include": ["docs", "theme", "rspress.config.ts"],
+  "include": ["docs", "theme", "rspress.config.ts", "src"],
   "mdx": {
     "checkMdx": true
   }

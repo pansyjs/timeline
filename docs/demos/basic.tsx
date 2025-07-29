@@ -1,11 +1,9 @@
 import React from 'react';
+import { TimeLine } from '@pansy/timeline';
 
 function Demo() {
   return (
-    <div>
-      <h1>Basic Timeline Demo</h1>
-      <p>This is a basic demo of the Timeline component.</p>
-    </div>
+    <TimeLine data={[]} />
   );
 };
 
