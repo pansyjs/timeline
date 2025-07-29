@@ -42,6 +42,5 @@ export default defineConfig({
   ],
   plugins: [
     pluginReact(),
-    // pluginLess(),
   ],
 });
