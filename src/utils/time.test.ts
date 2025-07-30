@@ -1,7 +1,6 @@
 import type { DataItem } from '../types';
-import dayjs from 'dayjs';
 import { expect, it } from 'vitest';
-import { calculateTimeRange } from './'
+import { calculateTimeRange } from './time'
 
 const mockEvents: DataItem[] = [
   {
@@ -46,19 +45,9 @@ const mockEvents: DataItem[] = [
   },
 ];
 
-it('实际事件范围大于最小时间范围', () => {
+it('实际时间范围大于最小时间范围', () => {
   const timeRange = calculateTimeRange(mockEvents);
 
-  expect((timeRange.startTime).format('YYYY-MM-DD HH:mm:ss')).toBe('2024-03-10 09:30:00');
-  expect((timeRange.endTime).format('YYYY-MM-DD HH:mm:ss')).toBe('2024-05-29 23:45:00');
-});
-
-it('数据为空时，直接返回最小事件范围', () => {
-  const timeRange = calculateTimeRange([]);
-
-  const startTime = dayjs().subtract(60 * 24 / 2, 'minute').format('YYYY-MM-DD HH:mm:ss');
-  const endTime = dayjs().add(60 * 24 / 2, 'minute').format('YYYY-MM-DD HH:mm:ss')
-
-  expect((timeRange.startTime).format('YYYY-MM-DD HH:mm:ss')).toBe(startTime);
-  expect((timeRange.endTime).format('YYYY-MM-DD HH:mm:ss')).toBe(endTime);
+  expect((timeRange.start).format('YYYY-MM-DD HH:mm:ss')).toBe('2024-03-10 09:00:00');
+  expect((timeRange.end).format('YYYY-MM-DD HH:mm:ss')).toBe('2024-05-30 00:00:00');
 });

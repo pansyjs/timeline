@@ -1,6 +1,16 @@
 import type { ConfigType, Dayjs } from 'dayjs';
 
-type Time = ConfigType;
+type Time = NonNullable<ConfigType>;
+
+interface TimeRange {
+  start: Time;
+  end: Time;
+}
+
+interface TimeRangeDayJS {
+  start: Dayjs;
+  end: Dayjs;
+}
 
 /** 时间轴视图类型 */
 type TimeAxisView  = 'month' | 'day' | 'hour' | 'minute' | 'second';
@@ -29,10 +39,21 @@ interface TimeAxisProps {
   times?: [Dayjs, Dayjs];
 }
 
+
+interface Tick {
+  /** 刻度对应的时间戳 */
+  time: number;
+  /** 是否显示对应的 label */
+  showLabel: boolean;
+}
+
 export type {
   Time,
   TimeAxisView,
   DataItem,
   TimeLineProps,
   TimeAxisProps,
+  Tick,
+  TimeRange,
+  TimeRangeDayJS,
 }

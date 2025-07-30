@@ -1,9 +1,29 @@
-import type { DataItem, Time, TimeRange } from '../types';
+import type { DataItem, Time, TimeRange, TimeRangeDayJS } from '../types';
 import dayjs from 'dayjs';
-import { defaultPrefixCls } from '../config';
 
 const isTimeRange = (time: DataItem['time']): time is [Time, Time] =>
   Array.isArray(time) && time.length === 2;
+
+/**
+ * 处理时间范围为整小时
+ * @param props
+ * @returns
+ */
+function processTimeRange(props: TimeRange): TimeRangeDayJS {
+  const { start, end } = props;
+
+  const isEndExactHour =
+    dayjs(end).minute() === 0 &&
+    dayjs(end).second() === 0 &&
+    dayjs(end).millisecond() === 0;
+
+  return {
+    start: dayjs(start).startOf('hour'),
+    end: isEndExactHour
+      ? dayjs(end)
+      : dayjs(end).add(1, 'hour').startOf('hour')
+  };
+}
 
 interface CalculateTimeRangeOptions {
   /**
@@ -22,16 +42,6 @@ interface CalculateTimeRangeOptions {
   defaultCenter?: Time;
 }
 
-export function processTimeRange(props: TimeRange) {
-  const { start, end } = props;
-
-  return {
-    start: dayjs(start).startOf('hour'),
-    endTime: dayjs(end).add(1, 'hour').startOf('hour')
-  };
-}
-
-
 /**
  * 计算数据的时间范围
  * @param data
@@ -46,12 +56,12 @@ export function calculateTimeRange(data: DataItem[], options: CalculateTimeRange
 
   const centerTime = dayjs(defaultCenter);
   const defaultTimeRange = {
-    startTime: centerTime.subtract(minRange / 2, 'minute'),
-    endTime: centerTime.add(minRange / 2, 'minute'),
+    start: centerTime.subtract(minRange / 2, 'minute'),
+    end: centerTime.add(minRange / 2, 'minute'),
   }
 
   if (!data || data.length === 0) {
-    return defaultTimeRange;
+    return processTimeRange(defaultTimeRange);
   }
 
   const allTimes = data.flatMap(item => {
@@ -64,10 +74,10 @@ export function calculateTimeRange(data: DataItem[], options: CalculateTimeRange
   if (allTimes.length === 1) {
     const centerTime = dayjs(allTimes[0]);
 
-    return {
-      startTime: centerTime.subtract(minRange / 2, 'minute'),
-      endTime: centerTime.add(minRange / 2, 'minute'),
-    }
+    return processTimeRange({
+      start: centerTime.subtract(minRange / 2, 'minute'),
+      end: centerTime.add(minRange / 2, 'minute'),
+    })
   }
 
   // 计算原始时间范围
@@ -84,30 +94,14 @@ export function calculateTimeRange(data: DataItem[], options: CalculateTimeRange
   if (timeRange < minRange) {
     const extendBy = (minRange - timeRange) / 2;
 
-    return {
-      startTime: trimmedStartTime.subtract(extendBy, 'minute'),
-      endTime: trimmedEndTime.add(extendBy, 'minute')
-    };
+    return processTimeRange({
+      start: trimmedStartTime.subtract(extendBy, 'minute'),
+      end: trimmedEndTime.add(extendBy, 'minute')
+    });
   }
 
-  return {
-    startTime: trimmedStartTime,
-    endTime: trimmedEndTime
-  };
-}
-
-export function defaultGetPrefixCls(suffixCls?: string, customizePrefixCls?: string) {
-  if (customizePrefixCls) return customizePrefixCls;
-
-  return suffixCls ? `${defaultPrefixCls}-${suffixCls}` : defaultPrefixCls;
-};
-
-/** 获取滚动事件 */
-export function getWheelType() {
-  const wheelType = 'onwheel' in document.createElement('div')
-    ? 'wheel'
-    // @ts-expect-error 忽略此报错
-    : document.onmousewheel !== undefined ? 'mousewheel' : 'DOMMouseScroll';
-
-  return wheelType;
+  return processTimeRange({
+    start: trimmedStartTime,
+    end: trimmedEndTime
+  });
 }

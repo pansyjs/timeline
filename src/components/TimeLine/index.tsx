@@ -3,7 +3,8 @@ import React from 'react';
 import interact from 'interactjs';
 import { TimeAxis } from '../Axis';
 import { ConfigContext } from '../../context';
-import { calculateTimeRange, getWheelType } from '../../utils';
+import { getWheelType } from '../../utils';
+import { calculateTimeRange } from '../../utils/time';
 import './style/index.less';
 
 export function TimeLine(props: TimeLineProps) {
@@ -17,6 +18,8 @@ export function TimeLine(props: TimeLineProps) {
 
   function onMouseWheel(event: WheelEvent) {
     event.preventDefault();
+
+    console.log('deltaX', event.deltaX, 'deltaY', event.deltaY);
   }
 
   React.useEffect(
@@ -41,11 +44,11 @@ export function TimeLine(props: TimeLineProps) {
 
       const wheelType = getWheelType();
 
-      root.addEventListener(wheelType as 'wheel', onMouseWheel)
+      root.addEventListener(wheelType as 'wheel', onMouseWheel, false)
 
       return () => {
         interact(root).unset();
-        root.removeEventListener(wheelType as 'wheel', onMouseWheel)
+        root.removeEventListener(wheelType as 'wheel', onMouseWheel, false)
       }
     },
     []
@@ -59,7 +62,7 @@ export function TimeLine(props: TimeLineProps) {
         defaultCenter: new Date(),
       });
 
-      setTimeRange([timeRange.startTime, timeRange.endTime]);
+      setTimeRange([timeRange.start, timeRange.end]);
     },
     [data]
   )
