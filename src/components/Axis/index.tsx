@@ -7,11 +7,11 @@ import { GRANULARITIES } from '../../config';
 import './style/index.less';
 
 export function TimeAxis(props: TimeAxisProps) {
-  const axisRef = React.useRef<HTMLDivElement>(null);
-  // 时间粒度状态（默认1分钟）
-  const [granularity, setGranularity] = React.useState(0);
   const { times } = props;
 
+  const axisRef = React.useRef<HTMLDivElement>(null);
+  /** 时间粒度（默认1分钟） */
+  const [granularity, setGranularity] = React.useState(0);
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('timeline-axis');
 
