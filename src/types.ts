@@ -30,6 +30,16 @@ interface DataItem {
 }
 
 interface TimeLineProps {
+  /**
+   * 是否可移动
+   * @default true
+   */
+  moveable?: boolean;
+  /**
+   * 是否可缩放
+   * @default true
+   */
+  zoomable?: boolean;
   /** 数据 */
   data: DataItem[];
 }

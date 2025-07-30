@@ -10,6 +10,7 @@ import './style/index.less';
 export function TimeLine(props: TimeLineProps) {
   const { data } = props;
   const rootRef = React.useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
   /** 左右拖动 */
   const positionX = React.useRef(0);
   const [timeRange, setTimeRange] = React.useState<TimeAxisProps['times']>();
@@ -27,20 +28,29 @@ export function TimeLine(props: TimeLineProps) {
       const root = rootRef.current;
       if (!root) return;
 
-      interact(root).draggable({
-        lockAxis: 'x',
-        inertia: true,
-        listeners: {
-          start () {
-            positionX.current = 0;
-          },
-          move (event) {
-            positionX.current = positionX.current + event.dx;
+      interact(root)
+        .styleCursor(false)
+        .draggable({
+          lockAxis: 'x',
+          inertia: true,
+          listeners: {
+            start() {
+              positionX.current = 0;
+            },
+            move(event) {
+              positionX.current = positionX.current + event.dx;
 
-            console.log(positionX.current)
+              console.log(positionX.current)
+            },
+            end() {},
           },
-        }
-      })
+        })
+        .on('mousedown', function() {
+          setIsDragging(true);
+        })
+        .on('mouseup', function() {
+          setIsDragging(false);
+        });
 
       const wheelType = getWheelType();
 
@@ -68,7 +78,11 @@ export function TimeLine(props: TimeLineProps) {
   )
 
   return (
-    <div className={prefixCls} ref={rootRef}>
+    <div
+      className={prefixCls}
+      ref={rootRef}
+      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+    >
       <TimeAxis times={timeRange} />
     </div>
   );
