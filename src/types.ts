@@ -41,10 +41,8 @@ interface TimeAxisProps {
 
 
 interface Tick {
-  /** 刻度对应的时间戳 */
-  time: number;
-  /** 是否显示对应的 label */
-  showLabel: boolean;
+  /** 刻度对应的时间 */
+  time: Dayjs;
 }
 
 export type {

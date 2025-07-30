@@ -23,17 +23,12 @@ export function TimeAxis(props: TimeAxisProps) {
         return ticks;
       }
 
-      const currentStep = GRANULARITIES[granularity].value;
+      const { step, unit } = GRANULARITIES[granularity]
 
-      const startTimeValue = times[0].valueOf();
-      const endTimeValue = times[1].valueOf();
-      const firstTick = startTimeValue;
-
-      for (let time = firstTick; time <= endTimeValue; time += currentStep) {
+      for (let time = times[0]; time.isBefore(times[1]); time = time.add(step, unit)) {
         ticks.push({
           time,
-          showLabel: true,
-        })
+        });
       }
 
       return ticks;
@@ -50,10 +45,11 @@ export function TimeAxis(props: TimeAxisProps) {
       <div className={`${prefixCls}-ticks`}>
         {ticks.map((item, index) => {
           const { time } = item;
+          const { labelStep, majorLabelFormat, minorLabelFormat } = GRANULARITIES[granularity]
 
-          const majorLabel = dayjs(time).format('YYYY-MM-DD');
-          const minorLabel = dayjs(time).format('HH:mm:ss');
-          const showLabel = index % 10 === 0;
+          const majorLabel = dayjs(time).format(majorLabelFormat);
+          const minorLabel = dayjs(time).format(minorLabelFormat);
+          const showLabel = index % labelStep === 0;
 
           return (
             <div
@@ -61,7 +57,7 @@ export function TimeAxis(props: TimeAxisProps) {
                 [`${prefixCls}-tick-major`]: showLabel,
                 [`${prefixCls}-tick-big-major`]: index === 0,
               })}
-              key={time}
+              key={index}
             >
               {showLabel && (
                 <div className={`${prefixCls}-tick-lable`}>
