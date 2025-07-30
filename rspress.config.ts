@@ -30,7 +30,7 @@ export default defineConfig({
   builderConfig: {
     resolve: {
       alias: {
-        '@pansy/timeline': './src',
+        '@pansy/react-timeline': './src',
       },
     },
   },

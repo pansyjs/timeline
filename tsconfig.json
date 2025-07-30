@@ -15,8 +15,8 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
-      "@pansy/timeline": ["src"],
-      "@pansy/timeline/*": ["src/*"] // 支持子路径
+      "@pansy/react-timeline": ["src"],
+      "@pansy/react-timeline/*": ["src/*"] // 支持子路径
     }
   },
   "include": ["docs", "theme", "rspress.config.ts", "src"],

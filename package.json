@@ -1,5 +1,5 @@
 {
-  "name": "@pansy/timeline",
+  "name": "@pansy/react-timeline",
   "version": "1.0.0",
   "sideEffects": [
     "*.less"
@@ -34,7 +34,8 @@
   },
   "dependencies": {
     "dayjs": "^1.11.13",
-    "es-toolkit": "^1.39.8"
+    "es-toolkit": "^1.39.8",
+    "interactjs": "^1.10.27"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

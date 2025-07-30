@@ -1,5 +1,5 @@
 import React from 'react';
-import { TimeLine } from '@pansy/timeline';
+import { TimeLine } from '@pansy/react-timeline';
 
 function Demo() {
   return (
