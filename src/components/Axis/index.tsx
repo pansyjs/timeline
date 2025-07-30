@@ -11,8 +11,6 @@ export function TimeAxis(props: TimeAxisProps) {
 
   if (!times) return null;
 
-  console.log(times)
-
   return (
     <div className={prefixCls}>
       Hello World 123
