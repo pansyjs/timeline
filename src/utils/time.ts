@@ -105,3 +105,44 @@ export function calculateTimeRange(data: DataItem[], options: CalculateTimeRange
     end: trimmedEndTime
   });
 }
+
+interface CalculatePositionFromTimeOptions {
+  /** 需要计算位置的目标时间 */
+  targetTime: Time;
+  /** 时间轴的起始基准时间 */
+  baseTime: Time;
+  /** 每个刻度代表的时间间隔（毫秒） */
+  tickIntervalMs: number;
+ /** 单个刻度的宽度（像素） */
+  tickWidth: number;
+  /** 刻度之间的间距（像素） */
+  tickGap: number;
+  /** 事件刻度左侧偏移 */
+  paddingStart: number;
+  /** 点的大小 */
+  potSize: number;
+}
+
+/**
+ * 根据目标时间计算其在时间轴上的像素位置
+ * @param opts
+ */
+export function calculatePositionFromTime(opts: CalculatePositionFromTimeOptions) {
+  const {
+    targetTime,
+    baseTime,
+    tickIntervalMs,
+    tickWidth,
+    tickGap,
+    paddingStart,
+    potSize,
+  } = opts;
+
+  const targetTimestamp = dayjs(targetTime).valueOf();
+  const baseTimestamp = dayjs(baseTime).valueOf();
+  const timeDiffMs = targetTimestamp - baseTimestamp;
+
+  const ticksCount = timeDiffMs / tickIntervalMs;
+
+  return ticksCount * (tickWidth + tickGap) + paddingStart - potSize / 2;
+}

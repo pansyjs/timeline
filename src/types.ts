@@ -60,6 +60,7 @@ interface TimeLineProps extends BaseProps {
 interface TimeAxisProps extends BaseProps {
   /** 时间范围 */
   timeRange?: TimeRangeDayJS;
+  children?: React.ReactNode;
 }
 
 interface TimePointProps extends BaseProps {

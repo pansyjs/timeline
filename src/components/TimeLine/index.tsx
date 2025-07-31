@@ -5,8 +5,13 @@ import interact from 'interactjs';
 import { TimeAxis } from '../TimeAxis';
 import { TimePoint } from '../TimePoint';
 import { TimeLineContext } from '../context';
-import { defaultPrefixCls } from '../../config';
-import { getWheelType, calculateTimeRange, getPrefixCls as getPrefixClsUtil } from '../../utils';
+import { defaultPrefixCls, AXIS_CONFIG, POINT_SIZE } from '../../config';
+import {
+  getWheelType,
+  calculateTimeRange,
+  getPrefixCls as getPrefixClsUtil,
+  calculatePositionFromTime,
+} from '../../utils';
 import { emitter } from '../../utils';
 import './style/index.less';
 
@@ -14,7 +19,7 @@ export function TimeLine(props: TimeLineProps) {
   const {
     className,
     style,
-    data,
+    data = [],
     moveable = true,
   } = props;
 
@@ -94,7 +99,7 @@ export function TimeLine(props: TimeLineProps) {
       setTimeRange(timeRange);
     },
     [data]
-  )
+  );
 
   return (
     <div
@@ -111,11 +116,31 @@ export function TimeLine(props: TimeLineProps) {
           getPrefixCls
         }}
       >
-        <TimeAxis timeRange={timeRange} />
+        <TimeAxis timeRange={timeRange}>
+          {timeRange && data.map((item) => {
+            const { time, id } = item;
 
-        <TimePoint time={'2024-03-10 10:00:00'} />
-        <br></br>
-        <TimePoint time={['2024-03-10 11:30:00', '2024-03-10 13:30:00']} />
+            const position = calculatePositionFromTime({
+              targetTime: Array.isArray(time) ? time[0] : time,
+              baseTime: timeRange.start,
+              tickIntervalMs: 1000 * 60,
+              tickWidth: 1,
+              tickGap: 8,
+              paddingStart: AXIS_CONFIG.paddingStart,
+              potSize: POINT_SIZE,
+            });
+
+            return (
+              <TimePoint
+                style={{
+                  transform: `translateX(${position}px)`
+                }}
+                key={id}
+                time={time}
+              />
+            )
+          })}
+        </TimeAxis>
       </TimeLineContext.Provider>
     </div>
   );

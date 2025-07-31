@@ -4,12 +4,12 @@ import { clsx } from 'clsx';
 import React from 'react';
 import dayjs from 'dayjs';
 import { TimeLineContext } from '../context';
-import { GRANULARITIES } from '../../config';
+import { GRANULARITIES, AXIS_CONFIG } from '../../config';
 import { emitter } from '../../utils';
 import './style/index.less';
 
 export function TimeAxis(props: TimeAxisProps) {
-  const { timeRange } = props;
+  const { timeRange, children } = props;
 
   const axisRef = React.useRef<HTMLDivElement>(null);
   /** 时间粒度（默认1分钟） */
@@ -46,8 +46,8 @@ export function TimeAxis(props: TimeAxisProps) {
     getScrollElement: () => axisRef.current,
     estimateSize: () => 1,
     gap: 8,
-    paddingStart: 48,
-    paddingEnd: 48,
+    paddingStart: AXIS_CONFIG.paddingStart,
+    paddingEnd: AXIS_CONFIG.paddingEnd,
   });
 
   const handlePanMove = (e: any) => {
@@ -93,8 +93,6 @@ export function TimeAxis(props: TimeAxisProps) {
               data-index={index}
               ref={ticksVirtualizer.measureElement}
               style={{
-                height: '100%',
-                width: `${ticks[index]}px`,
                 transform: `translateX(${virtualColumn.start}px)`,
               }}
             >
@@ -105,8 +103,9 @@ export function TimeAxis(props: TimeAxisProps) {
               )}
             </div>
           )
-          })}
+        })}
       </div>
+      {children}
     </div>
   )
 }

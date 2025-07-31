@@ -3,14 +3,18 @@
 @time-axis-prefix-cls: ~'@{root-prefix}-timeline-point';
 
 .@{time-axis-prefix-cls} {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 10;
+
   &-range {
-    cursor: pointer;
-    pointer-events: auto;
     display: flex;
-    z-index: 10;
     justify-content: space-between;
-    height: 8px;
-    min-width: 8px;
+    height: @point-size;
+    min-width: @point-size;
     border-radius: 4px;
     background: @range-color;
     width: 200px;
@@ -25,11 +29,8 @@
   }
 
   &-dot {
-    pointer-events: auto;
-    z-index: 10;
-    position: relative;
-    width: 8px;
-    height: 8px;
+    width: @point-size;
+    height: @point-size;
     border-radius: 50%;
     cursor: pointer;
     background: @point-color;

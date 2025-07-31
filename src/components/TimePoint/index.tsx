@@ -1,10 +1,11 @@
 import React from 'react';
 import type { TimePointProps } from '../../types';
+import { clsx } from 'clsx';
 import { TimeLineContext } from '../context';
 import './styles/index.less';
 
 export function TimePoint(props: TimePointProps) {
-  const { time } = props;
+  const { className, style, time } = props;
   const { getPrefixCls } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-point');
 
@@ -12,7 +13,10 @@ export function TimePoint(props: TimePointProps) {
 
   if (isRange) {
     return (
-      <div className={`${prefixCls}-range`}>
+      <div
+        className={clsx(prefixCls, `${prefixCls}-range`, className)}
+        style={style}
+      >
         <div className={`${prefixCls}-dot`} />
         <div className={`${prefixCls}-dot`} />
       </div>
@@ -20,6 +24,6 @@ export function TimePoint(props: TimePointProps) {
   }
 
   return (
-    <div className={`${prefixCls}-dot`} />
+    <div className={clsx(prefixCls, `${prefixCls}-dot`, className)} style={style} />
   )
 }

@@ -21,3 +21,10 @@ export const GRANULARITIES: GranularityItem[] = [
   { scale: 'hour', step: 12, labelStep: 5, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm' },
   { scale: 'day', step: 1, labelStep: 1, majorLabelFormat: 'YYYY-MM', minorLabelFormat: 'DD' },
 ];
+
+export const AXIS_CONFIG = {
+  paddingStart: 48,
+  paddingEnd: 48,
+}
+
+export const POINT_SIZE = 8;
