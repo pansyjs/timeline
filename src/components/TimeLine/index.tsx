@@ -6,7 +6,7 @@ import { TimeCard } from '../TimeCard';
 import { TimeAxis } from '../TimeAxis';
 import { TimePoint } from '../TimePoint';
 import { TimeLineContext } from '../context';
-import { defaultPrefixCls, AXIS_CONFIG, POINT_SIZE } from '../../config';
+import { defaultPrefixCls, AXIS_CONFIG, POINT_SIZE, DEFAULT_COLOR } from '../../config';
 import {
   getWheelType,
   calculateTimeRange,
@@ -23,6 +23,7 @@ export function TimeLine(props: TimeLineProps) {
     style,
     data = [],
     moveable = true,
+    defaultColor = DEFAULT_COLOR,
   } = props;
 
   const customPrefixCls =  props.prefixCls || defaultPrefixCls;
@@ -122,6 +123,7 @@ export function TimeLine(props: TimeLineProps) {
         value={{
           prefixCls,
           getPrefixCls,
+          defaultColor,
           rootElement: rootRef.current!
         }}
       >

@@ -63,6 +63,11 @@ interface TimeLineProps extends BaseProps {
   zoomable?: boolean;
   /** 数据 */
   data: DataItem[];
+  /**
+   * 默认颜色
+   * @default #2B6DE5
+   */
+  defaultColor?: string;
 }
 
 interface TimeAxisProps extends Omit<BaseProps, 'prefixCls'> {

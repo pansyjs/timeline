@@ -9,10 +9,10 @@ import './styles/index.less';
 
 export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
   const { className, style, data, hover, ...rest } = props;
-  const { time, color } = data;
-  const { getPrefixCls } = React.useContext(TimeLineContext);
+  const { getPrefixCls, defaultColor } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-point');
 
+  const { time, color = defaultColor } = data;
   const isRange = Array.isArray(time) && time.length === 2;
 
   if (isRange) {

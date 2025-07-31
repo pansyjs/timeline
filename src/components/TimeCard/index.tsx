@@ -9,8 +9,10 @@ import './style/index.less';
 export function TimeCard(props: TimeCardProps & React.ComponentProps<'div'>) {
   const { className, style, hover, data, ...rest } = props;
 
-  const { getPrefixCls } = React.useContext(TimeLineContext);
+  const { getPrefixCls, defaultColor } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-card');
+
+  const { color = defaultColor, time } = data;
 
   function getTimes(data: TimeCardProps['data']['time']) {
     if (!data) {
@@ -20,7 +22,7 @@ export function TimeCard(props: TimeCardProps & React.ComponentProps<'div'>) {
     return Array.isArray(data) ? data : [data];
   }
 
-  const timeStr = getTimes(data?.time)
+  const timeStr = getTimes(time)
     .reduce<string>((prev, cur) => {
       const timeStr = dayjs(cur).format(DEFAULT_FORMAT);
       return prev ? prev + ' ~ ' + timeStr : prev + timeStr;
@@ -39,23 +41,21 @@ export function TimeCard(props: TimeCardProps & React.ComponentProps<'div'>) {
     >
       <div
         className={`${prefixCls}-line`}
-        style={hover ? { backgroundColor: data.color } : {}}
+        style={hover ? { backgroundColor: color } : {}}
       />
 
       <div
         className={`${prefixCls}-cntent`}
         style={{
-          borderColor: data.color,
+          borderColor: color,
         }}
       >
         <div className={`${prefixCls}-title`}>
           {data?.title}
         </div>
-        {data.time && (
-          <div className={`${prefixCls}-time`}>
-            {timeStr}
-          </div>
-        )}
+        <div className={`${prefixCls}-time`}>
+          {timeStr}
+        </div>
       </div>
     </div>
   )

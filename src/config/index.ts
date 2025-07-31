@@ -32,3 +32,4 @@ export const AXIS_CONFIG = {
 export const POINT_SIZE = 8;
 
 export const DEFAULT_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+export const DEFAULT_COLOR = '#2B6DE5';
