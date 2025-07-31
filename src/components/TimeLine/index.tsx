@@ -1,6 +1,7 @@
 import type { TimeLineProps, TimeAxisProps } from '../../types';
 import React from 'react';
 import { clsx } from 'clsx';
+import dayjs from 'dayjs';
 import interact from 'interactjs';
 import { TimeAxis } from '../TimeAxis';
 import { TimePoint } from '../TimePoint';
@@ -11,6 +12,7 @@ import {
   calculateTimeRange,
   getPrefixCls as getPrefixClsUtil,
   calculatePositionFromTime,
+  calculateWidthFormTimeRange,
 } from '../../utils';
 import { emitter } from '../../utils';
 import './style/index.less';
@@ -124,16 +126,31 @@ export function TimeLine(props: TimeLineProps) {
               targetTime: Array.isArray(time) ? time[0] : time,
               baseTime: timeRange.start,
               tickIntervalMs: 1000 * 60,
-              tickWidth: 1,
+              tickWidth: AXIS_CONFIG.width,
               tickGap: 8,
               paddingStart: AXIS_CONFIG.paddingStart,
               potSize: POINT_SIZE,
             });
 
+            let width: undefined | number = undefined;
+
+            if (Array.isArray(time) && time.length === 2) {
+              width = calculateWidthFormTimeRange({
+                timeRange: {
+                  start: time[0],
+                  end: time[1],
+                },
+                tickIntervalMs: 1000 * 60,
+                tickWidth: AXIS_CONFIG.width,
+                tickGap: 8,
+              });
+            }
+
             return (
               <TimePoint
                 style={{
-                  transform: `translateX(${position}px)`
+                  transform: `translateX(${position}px)`,
+                  width: width ? `${width}px` : undefined,
                 }}
                 key={id}
                 time={time}

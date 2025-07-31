@@ -25,6 +25,10 @@ export const GRANULARITIES: GranularityItem[] = [
 export const AXIS_CONFIG = {
   paddingStart: 48,
   paddingEnd: 48,
+  /** 刻度的宽度 */
+  width: 1,
 }
 
 export const POINT_SIZE = 8;
+
+export const DEFAULT_FORMAT = 'YYYY-MM-DD HH:mm:ss';

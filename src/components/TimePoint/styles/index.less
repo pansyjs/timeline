@@ -8,16 +8,15 @@
   left: 0;
   cursor: pointer;
   pointer-events: auto;
-  z-index: 10;
 
   &-range {
     display: flex;
+    z-index: 10;
     justify-content: space-between;
     height: @point-size;
     min-width: @point-size;
     border-radius: 4px;
     background: @range-color;
-    width: 200px;
 
     &:hover {
       background: @range-hover-color;
@@ -29,6 +28,7 @@
   }
 
   &-dot {
+    z-index: 20;
     width: @point-size;
     height: @point-size;
     border-radius: 50%;

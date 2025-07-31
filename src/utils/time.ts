@@ -146,3 +146,31 @@ export function calculatePositionFromTime(opts: CalculatePositionFromTimeOptions
 
   return ticksCount * (tickWidth + tickGap) + paddingStart - potSize / 2;
 }
+
+interface CalculateWidthFormTimeRangeOptions {
+  /** 需要计算位置的目标时间 */
+  timeRange: TimeRange;
+  /** 每个刻度代表的时间间隔（毫秒） */
+  tickIntervalMs: number;
+  /** 单个刻度的宽度（像素） */
+  tickWidth: number;
+  /** 刻度之间的间距（像素） */
+  tickGap: number;
+}
+
+export function calculateWidthFormTimeRange(opts: CalculateWidthFormTimeRangeOptions) {
+  const {
+    timeRange,
+    tickIntervalMs,
+    tickWidth,
+    tickGap,
+  } = opts;
+
+  const startTimestamp = dayjs(timeRange.start).valueOf();
+  const endTimestamp = dayjs(timeRange.end).valueOf();
+  const timeDiffMs = endTimestamp - startTimestamp;
+
+  const ticksCount = timeDiffMs / tickIntervalMs;
+
+  return ticksCount * (tickWidth + tickGap) + tickGap;
+}
