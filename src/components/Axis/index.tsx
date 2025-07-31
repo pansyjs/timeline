@@ -5,6 +5,7 @@ import React from 'react';
 import dayjs from 'dayjs';
 import { ConfigContext } from '../../context';
 import { GRANULARITIES } from '../../config';
+import { emitter } from '../../utils';
 import './style/index.less';
 
 export function TimeAxis(props: TimeAxisProps) {
@@ -49,11 +50,17 @@ export function TimeAxis(props: TimeAxisProps) {
     paddingEnd: 48,
   });
 
+  const handlePanMove = (e: any) => {
+    ticksVirtualizer.scrollToOffset(ticksVirtualizer.scrollOffset + e.dx)
+  }
+
   React.useEffect(
     () => {
-      setTimeout(() => {
-        ticksVirtualizer.scrollBy(1300, { behavior: 'smooth'  })
-      }, 1000 * 5)
+      emitter.on('panmove', handlePanMove);
+
+      return () => {
+        emitter.off('panmove', handlePanMove)
+      }
     },
     []
   )

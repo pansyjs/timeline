@@ -37,7 +37,8 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "es-toolkit": "^1.39.8",
-    "interactjs": "^1.10.27"
+    "interactjs": "^1.10.27",
+    "mitt": "^3.0.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

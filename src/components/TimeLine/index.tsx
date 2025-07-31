@@ -3,8 +3,8 @@ import React from 'react';
 import interact from 'interactjs';
 import { TimeAxis } from '../Axis';
 import { ConfigContext } from '../../context';
-import { getWheelType } from '../../utils';
-import { calculateTimeRange } from '../../utils/time';
+import { getWheelType, calculateTimeRange } from '../../utils';
+import { emitter } from '../../utils';
 import './style/index.less';
 
 export function TimeLine(props: TimeLineProps) {
@@ -33,14 +33,19 @@ export function TimeLine(props: TimeLineProps) {
         .draggable({
           lockAxis: 'x',
           inertia: true,
+          onstart: () => {
+
+          },
           listeners: {
-            start() {
+            start(e) {
+              emitter.emit('panstart', e);
               positionX.current = 0;
             },
-            move(event) {
-              positionX.current = positionX.current + event.dx;
+            move(e) {
+              emitter.emit('panmove', e);
+              // positionX.current = positionX.current + e.dx;
 
-              console.log(positionX.current)
+              // console.log(positionX.current)
             },
             end() {},
           },
