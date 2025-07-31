@@ -30,6 +30,12 @@ interface DataItem {
   [key: string]: any;
 }
 
+interface Tick {
+  /** 刻度对应的时间 */
+  time: Dayjs;
+}
+
+
 interface BaseProps {
    /** 额外的样式类 */
   className?: string;
@@ -57,20 +63,19 @@ interface TimeLineProps extends BaseProps {
   data: DataItem[];
 }
 
-interface TimeAxisProps extends BaseProps {
+interface TimeAxisProps extends Omit<BaseProps, 'prefixCls'> {
   /** 时间范围 */
   timeRange?: TimeRangeDayJS;
   children?: React.ReactNode;
 }
 
-interface TimePointProps extends BaseProps {
+interface TimePointProps extends Omit<BaseProps, 'prefixCls'> {
   /** 时间时间 */
   time: [Time, Time] | Time;
 }
 
-interface Tick {
-  /** 刻度对应的时间 */
-  time: Dayjs;
+interface TimeCardProps extends Omit<BaseProps, 'prefixCls'> {
+  data: DataItem;
 }
 
 export type {
@@ -80,6 +85,7 @@ export type {
   TimeLineProps,
   TimeAxisProps,
   TimePointProps,
+  TimeCardProps,
   Tick,
   TimeRange,
   TimeRangeDayJS,

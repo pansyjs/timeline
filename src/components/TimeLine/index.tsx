@@ -1,8 +1,8 @@
 import type { TimeLineProps, TimeAxisProps } from '../../types';
 import React from 'react';
 import { clsx } from 'clsx';
-import dayjs from 'dayjs';
 import interact from 'interactjs';
+import { TimeCard } from '../TimeCard';
 import { TimeAxis } from '../TimeAxis';
 import { TimePoint } from '../TimePoint';
 import { TimeLineContext } from '../context';
@@ -158,6 +158,15 @@ export function TimeLine(props: TimeLineProps) {
             )
           })}
         </TimeAxis>
+
+        <div style={{ padding: 24, display: 'flex', gap: 8 }}>
+          {data.map((item) => {
+            return (
+              <TimeCard key={item.id} data={item} />
+            )
+          })}
+        </div>
+
       </TimeLineContext.Provider>
     </div>
   );

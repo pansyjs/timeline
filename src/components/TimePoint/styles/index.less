@@ -1,8 +1,8 @@
 @import '../../../style/base.less';
 
-@time-axis-prefix-cls: ~'@{root-prefix}-timeline-point';
+@time-point-prefix-cls: ~'@{root-prefix}-timeline-point';
 
-.@{time-axis-prefix-cls} {
+.@{time-point-prefix-cls} {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -21,7 +21,7 @@
     &:hover {
       background: @range-hover-color;
 
-      .@{time-axis-prefix-cls}-dot {
+      .@{time-point-prefix-cls}-dot {
         background: @point-hover-color;
       }
     }
