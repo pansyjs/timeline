@@ -8,7 +8,7 @@ import { emitter } from '../../utils';
 import './style/index.less';
 
 export function TimeLine(props: TimeLineProps) {
-  const { data } = props;
+  const { data, moveable = true } = props;
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const [timeRange, setTimeRange] = React.useState<TimeAxisProps['timeRange']>();
@@ -31,17 +31,19 @@ export function TimeLine(props: TimeLineProps) {
         .draggable({
           lockAxis: 'x',
           inertia: true,
-          onstart: () => {
-
-          },
           listeners: {
             start(e) {
+              if (!moveable) return;
               emitter.emit('panstart', e);
             },
             move(e) {
+              if (!moveable) return;
               emitter.emit('panmove', e);
             },
-            end() {},
+            end(e) {
+              if (!moveable) return;
+              emitter.emit('panend', e);
+            },
           },
         })
         .on('mousedown', function() {

@@ -49,7 +49,6 @@ interface TimeAxisProps {
   timeRange?: TimeRangeDayJS;
 }
 
-
 interface Tick {
   /** 刻度对应的时间 */
   time: Dayjs;
