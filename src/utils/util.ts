@@ -1,9 +1,7 @@
 import { defaultPrefixCls } from '../config';
 
-export function defaultGetPrefixCls(suffixCls?: string, customizePrefixCls?: string) {
-  if (customizePrefixCls) return customizePrefixCls;
-
-  return suffixCls ? `${defaultPrefixCls}-${suffixCls}` : defaultPrefixCls;
+export function getPrefixCls(suffixCls?: string, prefixCls = defaultPrefixCls) {
+  return suffixCls ? `${prefixCls}-${suffixCls}` : prefixCls;
 };
 
 /** 获取滚动事件 */

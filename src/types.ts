@@ -1,3 +1,4 @@
+import React from 'react';
 import type { ConfigType, Dayjs } from 'dayjs';
 
 type Time = NonNullable<ConfigType>;
@@ -29,7 +30,19 @@ interface DataItem {
   [key: string]: any;
 }
 
-interface TimeLineProps {
+interface BaseProps {
+   /** 额外的样式类 */
+  className?: string;
+  /** 额外的样式 */
+  style?: React.CSSProperties;
+  /**
+   * 样式前缀
+   * @default pansy
+   */
+  prefixCls?: string;
+}
+
+interface TimeLineProps extends BaseProps {
   /**
    * 是否可移动
    * @default true
@@ -44,9 +57,14 @@ interface TimeLineProps {
   data: DataItem[];
 }
 
-interface TimeAxisProps {
+interface TimeAxisProps extends BaseProps {
   /** 时间范围 */
   timeRange?: TimeRangeDayJS;
+}
+
+interface TimePointProps extends BaseProps {
+  /** 时间时间 */
+  time: [Time, Time] | Time;
 }
 
 interface Tick {
@@ -60,6 +78,7 @@ export type {
   DataItem,
   TimeLineProps,
   TimeAxisProps,
+  TimePointProps,
   Tick,
   TimeRange,
   TimeRangeDayJS,

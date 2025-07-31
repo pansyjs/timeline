@@ -3,7 +3,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { clsx } from 'clsx';
 import React from 'react';
 import dayjs from 'dayjs';
-import { ConfigContext } from '../../context';
+import { TimeLineContext } from '../context';
 import { GRANULARITIES } from '../../config';
 import { emitter } from '../../utils';
 import './style/index.less';
@@ -14,7 +14,7 @@ export function TimeAxis(props: TimeAxisProps) {
   const axisRef = React.useRef<HTMLDivElement>(null);
   /** 时间粒度（默认1分钟） */
   const [granularity, setGranularity] = React.useState(0);
-  const { getPrefixCls } = React.useContext(ConfigContext);
+  const { getPrefixCls } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-axis');
 
   const generateTicks = React.useCallback(

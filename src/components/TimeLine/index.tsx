@@ -1,18 +1,36 @@
 import type { TimeLineProps, TimeAxisProps } from '../../types';
 import React from 'react';
+import { clsx } from 'clsx';
 import interact from 'interactjs';
 import { TimeAxis } from '../TimeAxis';
-import { ConfigContext } from '../../context';
-import { getWheelType, calculateTimeRange } from '../../utils';
+import { TimePoint } from '../TimePoint';
+import { TimeLineContext } from '../context';
+import { defaultPrefixCls } from '../../config';
+import { getWheelType, calculateTimeRange, getPrefixCls as getPrefixClsUtil } from '../../utils';
 import { emitter } from '../../utils';
 import './style/index.less';
 
 export function TimeLine(props: TimeLineProps) {
-  const { data, moveable = true } = props;
+  const {
+    className,
+    style,
+    data,
+    moveable = true,
+  } = props;
+
+  const customPrefixCls =  props.prefixCls || defaultPrefixCls;
+
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const [timeRange, setTimeRange] = React.useState<TimeAxisProps['timeRange']>();
-  const { getPrefixCls } = React.useContext(ConfigContext);
+
+  const getPrefixCls = React.useCallback(
+    (suffixCls?: string) => {
+      return getPrefixClsUtil(suffixCls, customPrefixCls);
+    },
+    [customPrefixCls]
+  );
+
   const prefixCls = getPrefixCls('timeline');
 
   function onMouseWheel(e: WheelEvent) {
@@ -80,11 +98,21 @@ export function TimeLine(props: TimeLineProps) {
 
   return (
     <div
-      className={prefixCls}
+      className={clsx(prefixCls, className)}
       ref={rootRef}
-      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      style={{
+        cursor: isDragging ? 'grabbing' : 'grab',
+        ...style
+      }}
     >
-      <TimeAxis timeRange={timeRange} />
+      <TimeLineContext.Provider
+        value={{
+          prefixCls,
+          getPrefixCls
+        }}
+      >
+        <TimeAxis timeRange={timeRange} />
+      </TimeLineContext.Provider>
     </div>
   );
 }
