@@ -39,10 +39,15 @@ export function TimeCard(props: TimeCardProps & React.ComponentProps<'div'>) {
     >
       <div
         className={`${prefixCls}-line`}
-        style={{  }}
+        style={hover ? { backgroundColor: data.color } : {}}
       />
 
-      <div className={`${prefixCls}-cntent`}>
+      <div
+        className={`${prefixCls}-cntent`}
+        style={{
+          borderColor: data.color,
+        }}
+      >
         <div className={`${prefixCls}-title`}>
           {data?.title}
         </div>

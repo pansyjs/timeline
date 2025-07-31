@@ -21,6 +21,8 @@ interface DataItem {
   id: string;
   /** 标题 */
   title: string;
+  /** 颜色 */
+  color?: string,
   /**
    * 时间
    *  - 数组表示该事件为持续事件
@@ -72,8 +74,8 @@ interface TimeAxisProps extends Omit<BaseProps, 'prefixCls'> {
 interface TimePointProps extends Omit<BaseProps, 'prefixCls'> {
   /** 是否 Hover */
   hover?: boolean;
-  /** 时间时间 */
-  time: [Time, Time] | Time;
+  /** 卡片数据 */
+  data: DataItem;
 }
 
 interface TimeCardProps extends Omit<BaseProps, 'prefixCls'> {

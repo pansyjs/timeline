@@ -161,7 +161,7 @@ export function TimeLine(props: TimeLineProps) {
                     transform: `translateX(${position}px)`,
                     width: width ? `${width}px` : undefined,
                   }}
-                  time={time}
+                  data={item}
                   hover={item.id === hoverItem?.id}
                   onMouseEnter={() => { handleHover(item) }}
                   onMouseLeave={() => { handleHover(null) }}

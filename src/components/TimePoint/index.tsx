@@ -4,10 +4,12 @@ import { clsx } from 'clsx';
 import dayjs from 'dayjs';
 import { TimeLineContext } from '../context';
 import { DEFAULT_FORMAT } from '../../config';
+import { adjustColorOpacity } from '../../utils';
 import './styles/index.less';
 
 export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
-  const { className, style, time, hover, ...rest } = props;
+  const { className, style, data, hover, ...rest } = props;
+  const { time, color } = data;
   const { getPrefixCls } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-point');
 
@@ -21,11 +23,26 @@ export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
           [`${prefixCls}-range`]: true,
           [`${prefixCls}-hover`]: hover,
         }, className)}
-        style={style}
+        style={{
+          ...style,
+          backgroundColor: color && hover ? adjustColorOpacity(color) : undefined
+        }}
         {...rest}
       >
-        <div className={`${prefixCls}-dot`} title={dayjs(time[0]).format(DEFAULT_FORMAT)} />
-        <div className={`${prefixCls}-dot`} title={dayjs(time[1]).format(DEFAULT_FORMAT)} />
+        <div
+          className={`${prefixCls}-dot`}
+          title={dayjs(time[0]).format(DEFAULT_FORMAT)}
+          style={{
+            backgroundColor: hover ? color : undefined,
+          }}
+        />
+        <div
+          className={`${prefixCls}-dot`}
+          title={dayjs(time[1]).format(DEFAULT_FORMAT)}
+          style={{
+            backgroundColor: hover ? color : undefined,
+          }}
+        />
       </div>
     )
   }
@@ -37,7 +54,10 @@ export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
         [`${prefixCls}-dot`]: true,
         [`${prefixCls}-hover`]: hover,
       }, className)}
-      style={style}
+      style={{
+        ...style,
+        backgroundColor: hover ? color : undefined,
+      }}
       title={dayjs(time as Time).format(DEFAULT_FORMAT)}
     />
   )
