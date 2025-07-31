@@ -112,6 +112,10 @@ export function TimeLine(props: TimeLineProps) {
         }}
       >
         <TimeAxis timeRange={timeRange} />
+
+        <TimePoint time={'2024-03-10 10:00:00'} />
+        <br></br>
+        <TimePoint time={['2024-03-10 11:30:00', '2024-03-10 13:30:00']} />
       </TimeLineContext.Provider>
     </div>
   );

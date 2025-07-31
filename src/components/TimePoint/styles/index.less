@@ -1,0 +1,41 @@
+@import '../../../style/base.less';
+
+@time-axis-prefix-cls: ~'@{root-prefix}-timeline-point';
+
+.@{time-axis-prefix-cls} {
+  &-range {
+    cursor: pointer;
+    pointer-events: auto;
+    display: flex;
+    z-index: 10;
+    justify-content: space-between;
+    height: 8px;
+    min-width: 8px;
+    border-radius: 4px;
+    background: @range-color;
+    width: 200px;
+
+    &:hover {
+      background: @range-hover-color;
+
+      .@{time-axis-prefix-cls}-dot {
+        background: @point-hover-color;
+      }
+    }
+  }
+
+  &-dot {
+    pointer-events: auto;
+    z-index: 10;
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    background: @point-color;
+
+    &:hover {
+      background: @point-hover-color;
+    }
+  }
+}

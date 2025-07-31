@@ -1,16 +1,25 @@
 import React from 'react';
 import type { TimePointProps } from '../../types';
-import { getPrefixCls } from '../../utils';
+import { TimeLineContext } from '../context';
+import './styles/index.less';
 
 export function TimePoint(props: TimePointProps) {
-  const { prefixCls } = props;
-  const prefixClsVal = getPrefixCls('timeline-point', prefixCls);
+  const { time } = props;
+  const { getPrefixCls } = React.useContext(TimeLineContext);
+  const prefixCls = getPrefixCls('timeline-point');
+
+  const isRange = Array.isArray(time) && time.length === 2;
+
+  if (isRange) {
+    return (
+      <div className={`${prefixCls}-range`}>
+        <div className={`${prefixCls}-dot`} />
+        <div className={`${prefixCls}-dot`} />
+      </div>
+    )
+  }
 
   return (
-    <>
-      <div className={prefixClsVal}>
-        123
-      </div>
-    </>
+    <div className={`${prefixCls}-dot`} />
   )
 }
