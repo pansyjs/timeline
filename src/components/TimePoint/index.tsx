@@ -4,7 +4,7 @@ import { clsx } from 'clsx';
 import dayjs from 'dayjs';
 import { TimeLineContext } from '../context';
 import { DEFAULT_FORMAT } from '../../config';
-import { adjustColorOpacity } from '../../utils';
+import { adjustColorOpacityMemoize } from '../../utils';
 import './styles/index.less';
 
 export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
@@ -21,7 +21,7 @@ export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
         className={clsx(prefixCls, `${prefixCls}-range`, className)}
         style={{
           ...style,
-          backgroundColor: (hover || checked) ? adjustColorOpacity(color) : undefined
+          backgroundColor: (hover || checked) ? adjustColorOpacityMemoize({ color }) : undefined
         }}
         {...rest}
       >
