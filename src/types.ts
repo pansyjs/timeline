@@ -46,7 +46,7 @@ interface TimeLineProps {
 
 interface TimeAxisProps {
   /** 时间范围 */
-  times?: [Dayjs, Dayjs];
+  timeRange?: TimeRangeDayJS;
 }
 
 

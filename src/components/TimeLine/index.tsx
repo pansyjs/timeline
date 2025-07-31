@@ -1,7 +1,7 @@
 import type { TimeLineProps, TimeAxisProps } from '../../types';
 import React from 'react';
 import interact from 'interactjs';
-import { TimeAxis } from '../Axis';
+import { TimeAxis } from '../TimeAxis';
 import { ConfigContext } from '../../context';
 import { getWheelType, calculateTimeRange } from '../../utils';
 import { emitter } from '../../utils';
@@ -11,16 +11,14 @@ export function TimeLine(props: TimeLineProps) {
   const { data } = props;
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
-  /** 左右拖动 */
-  const positionX = React.useRef(0);
-  const [timeRange, setTimeRange] = React.useState<TimeAxisProps['times']>();
+  const [timeRange, setTimeRange] = React.useState<TimeAxisProps['timeRange']>();
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('timeline');
 
-  function onMouseWheel(event: WheelEvent) {
-    event.preventDefault();
+  function onMouseWheel(e: WheelEvent) {
+    e.preventDefault();
 
-    console.log('deltaX', event.deltaX, 'deltaY', event.deltaY);
+    // console.log('deltaX', event.deltaX, 'deltaY', event.deltaY);
   }
 
   React.useEffect(
@@ -39,13 +37,9 @@ export function TimeLine(props: TimeLineProps) {
           listeners: {
             start(e) {
               emitter.emit('panstart', e);
-              positionX.current = 0;
             },
             move(e) {
               emitter.emit('panmove', e);
-              // positionX.current = positionX.current + e.dx;
-
-              // console.log(positionX.current)
             },
             end() {},
           },
@@ -77,7 +71,7 @@ export function TimeLine(props: TimeLineProps) {
         defaultCenter: new Date(),
       });
 
-      setTimeRange([timeRange.start, timeRange.end]);
+      setTimeRange(timeRange);
     },
     [data]
   )
@@ -88,7 +82,7 @@ export function TimeLine(props: TimeLineProps) {
       ref={rootRef}
       style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
     >
-      <TimeAxis times={timeRange} />
+      <TimeAxis timeRange={timeRange} />
     </div>
   );
 }

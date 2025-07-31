@@ -9,7 +9,7 @@ import { emitter } from '../../utils';
 import './style/index.less';
 
 export function TimeAxis(props: TimeAxisProps) {
-  const { times } = props;
+  const { timeRange } = props;
 
   const axisRef = React.useRef<HTMLDivElement>(null);
   /** 时间粒度（默认1分钟） */
@@ -21,13 +21,13 @@ export function TimeAxis(props: TimeAxisProps) {
     () => {
       const ticks: Tick[] = [];
 
-      if (!times) {
+      if (!timeRange) {
         return ticks;
       }
 
       const { step, scale } = GRANULARITIES[granularity]
 
-      for (let time = times[0]; time.isBefore(times[1]); time = time.add(step, scale)) {
+      for (let time = timeRange.start; time.isBefore(timeRange.end); time = time.add(step, scale)) {
         ticks.push({
           time,
         });
@@ -35,7 +35,7 @@ export function TimeAxis(props: TimeAxisProps) {
 
       return ticks;
     },
-    [times]
+    [timeRange]
   )
 
   const ticks = generateTicks();
