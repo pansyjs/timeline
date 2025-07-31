@@ -28,14 +28,18 @@ export function TimeCard(props: TimeCardProps) {
 
   return (
     <div className={clsx(prefixCls, className)} style={style}>
-      <div className={`${prefixCls}-title`}>
-        {data?.title}
-      </div>
-      {data.time && (
-        <div className={`${prefixCls}-time`}>
-          {timeStr}
+      <div className={`${prefixCls}-line`} />
+
+      <div className={`${prefixCls}-cntent`}>
+        <div className={`${prefixCls}-title`}>
+          {data?.title}
         </div>
-      )}
+        {data.time && (
+          <div className={`${prefixCls}-time`}>
+            {timeStr}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
