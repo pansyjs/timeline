@@ -3,6 +3,7 @@ import { pluginPreview } from '@rspress/plugin-preview';
 import { defineConfig } from 'rspress/config';
 
 export default defineConfig({
+  base: '/timeline/',
   root: path.join(__dirname, 'docs'),
   title: 'TimeLine',
   icon: '/rspress-icon.png',
