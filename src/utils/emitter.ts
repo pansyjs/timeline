@@ -1,4 +1,3 @@
-import type { EventType } from 'mitt';
 import mitt from 'mitt';
 
 export const emitter = mitt<{

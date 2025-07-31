@@ -11,7 +11,7 @@ interface AdjustColorOpacityOptions {
  * @param {number} opacity - 透明度值（0-1之间，例如0.3表示30%透明度）
  * @returns {string} 调整后的RGBA颜色字符串
  */
-export function adjustColorOpacity(opts: AdjustColorOpacityOptions) {
+function adjustColorOpacity(opts: AdjustColorOpacityOptions) {
   const { color, opacity = 0.3 } = opts;
 
   if (!color) return undefined;
@@ -19,8 +19,6 @@ export function adjustColorOpacity(opts: AdjustColorOpacityOptions) {
   if (typeof opacity !== 'number' || opacity < 0 || opacity > 1) {
     throw new Error('透明度必须是0到1之间的数字');
   }
-
-  console.log('***********')
 
   const tempEl = document.createElement('div');
   tempEl.style.display = 'none';
