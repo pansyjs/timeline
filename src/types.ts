@@ -70,11 +70,16 @@ interface TimeAxisProps extends Omit<BaseProps, 'prefixCls'> {
 }
 
 interface TimePointProps extends Omit<BaseProps, 'prefixCls'> {
+  /** 是否 Hover */
+  hover?: boolean;
   /** 时间时间 */
   time: [Time, Time] | Time;
 }
 
 interface TimeCardProps extends Omit<BaseProps, 'prefixCls'> {
+  /** 是否 Hover */
+  hover?: boolean;
+  /** 卡片数据 */
   data: DataItem;
 }
 

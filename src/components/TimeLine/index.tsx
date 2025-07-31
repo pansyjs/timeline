@@ -1,4 +1,4 @@
-import type { TimeLineProps, TimeAxisProps } from '../../types';
+import type { TimeLineProps, TimeAxisProps, DataItem } from '../../types';
 import React from 'react';
 import { clsx } from 'clsx';
 import interact from 'interactjs';
@@ -29,6 +29,8 @@ export function TimeLine(props: TimeLineProps) {
 
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
+  const [hoverItem, setHoverItem] = React.useState<DataItem | null>(null);
+  const [acitiveItem, setAcitiveItem] = React.useState<DataItem | null>(null)
   const [timeRange, setTimeRange] = React.useState<TimeAxisProps['timeRange']>();
 
   const getPrefixCls = React.useCallback(
@@ -103,6 +105,10 @@ export function TimeLine(props: TimeLineProps) {
     [data]
   );
 
+  const handleHover = (item: DataItem | null) => {
+    setHoverItem(item);
+  }
+
   return (
     <div
       className={clsx(prefixCls, className)}
@@ -156,6 +162,9 @@ export function TimeLine(props: TimeLineProps) {
                     width: width ? `${width}px` : undefined,
                   }}
                   time={time}
+                  hover={item.id === hoverItem?.id}
+                  onMouseEnter={() => { handleHover(item) }}
+                  onMouseLeave={() => { handleHover(null) }}
                 />
 
                 <TimeCard
@@ -163,7 +172,11 @@ export function TimeLine(props: TimeLineProps) {
                     transform: `translateX(${position + 4}px)`,
                     top: 50,
                   }}
+                  hover={item.id === hoverItem?.id}
                   data={item}
+                  onMouseEnter={() => { handleHover(item) }}
+                  onMouseLeave={() => { handleHover(null) }}
+
                 />
               </React.Fragment>
             )

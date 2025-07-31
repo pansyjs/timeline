@@ -6,6 +6,12 @@
   position: absolute;
   pointer-events: auto;
 
+  &&-hover {
+    .@{time-line-prefix-cls}-line {
+      background-color: @color-line-hover;
+    }
+  }
+
   &-line {
     position: absolute;
     top: -50px;

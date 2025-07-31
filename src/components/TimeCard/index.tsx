@@ -6,8 +6,8 @@ import { DEFAULT_FORMAT } from '../../config';
 import React from 'react';
 import './style/index.less';
 
-export function TimeCard(props: TimeCardProps) {
-  const { className, style, data } = props;
+export function TimeCard(props: TimeCardProps & React.ComponentProps<'div'>) {
+  const { className, style, hover, data, ...rest } = props;
 
   const { getPrefixCls } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-card');
@@ -27,8 +27,20 @@ export function TimeCard(props: TimeCardProps) {
     }, '');
 
   return (
-    <div className={clsx(prefixCls, className)} style={style}>
-      <div className={`${prefixCls}-line`} />
+    <div
+      className={
+        clsx({
+          [`${prefixCls}`]: true,
+          [`${prefixCls}-hover`]: hover
+        }, className)
+      }
+      style={style}
+      {...rest}
+    >
+      <div
+        className={`${prefixCls}-line`}
+        style={{  }}
+      />
 
       <div className={`${prefixCls}-cntent`}>
         <div className={`${prefixCls}-title`}>
