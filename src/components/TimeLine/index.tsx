@@ -17,21 +17,22 @@ import {
 import { emitter } from '../../utils';
 import './style/index.less';
 
-export function TimeLine(props: TimeLineProps) {
+export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>) {
   const {
     className,
     style,
     data = [],
     moveable = true,
     defaultColor = DEFAULT_COLOR,
+    onSelect,
   } = props;
 
   const customPrefixCls =  props.prefixCls || defaultPrefixCls;
 
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
-  const [hoverItem, setHoverItem] = React.useState<DataItem | null>(null);
-  const [acitiveItem, setAcitiveItem] = React.useState<DataItem | null>(null)
+  const [hoverItem, setHoverItem] = React.useState<D | null>(null);
+  const [selectItem, setSelectItem] = React.useState<D | null>(null)
   const [timeRange, setTimeRange] = React.useState<TimeAxisProps['timeRange']>();
 
   const getPrefixCls = React.useCallback(
@@ -106,8 +107,18 @@ export function TimeLine(props: TimeLineProps) {
     [data]
   );
 
-  const handleHover = (item: DataItem | null) => {
+  const handleHover = (item: D | null) => {
     setHoverItem(item);
+  }
+
+  const handleClick = (item: D) => {
+    if (selectItem?.id === item.id) {
+      setSelectItem(null);
+      onSelect?.(null)
+      return;
+    }
+    setSelectItem(item);
+    onSelect?.(item)
   }
 
   return (
@@ -165,20 +176,23 @@ export function TimeLine(props: TimeLineProps) {
                   }}
                   data={item}
                   hover={item.id === hoverItem?.id}
+                  checked={item.id === selectItem?.id}
                   onMouseEnter={() => { handleHover(item) }}
                   onMouseLeave={() => { handleHover(null) }}
+                  onClick={() => { handleClick(item) }}
                 />
 
                 <TimeCard
                   style={{
                     transform: `translateX(${position + 4}px)`,
-                    top: 50,
                   }}
+                  position={index % 2 ? 24 : 100}
                   hover={item.id === hoverItem?.id}
+                  checked={item.id === selectItem?.id}
                   data={item}
                   onMouseEnter={() => { handleHover(item) }}
                   onMouseLeave={() => { handleHover(null) }}
-
+                  onClick={() => { handleClick(item) }}
                 />
               </React.Fragment>
             )

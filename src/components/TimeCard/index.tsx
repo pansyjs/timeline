@@ -7,7 +7,7 @@ import React from 'react';
 import './style/index.less';
 
 export function TimeCard(props: TimeCardProps & React.ComponentProps<'div'>) {
-  const { className, style, hover, data, ...rest } = props;
+  const { className, style, hover, data, checked, position= 24, ...rest } = props;
 
   const { getPrefixCls, defaultColor } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-card');
@@ -30,18 +30,20 @@ export function TimeCard(props: TimeCardProps & React.ComponentProps<'div'>) {
 
   return (
     <div
-      className={
-        clsx({
-          [`${prefixCls}`]: true,
-          [`${prefixCls}-hover`]: hover
-        }, className)
-      }
-      style={style}
+      className={clsx(prefixCls, className)}
+      style={{
+        ...style,
+        top: position,
+      }}
       {...rest}
     >
       <div
         className={`${prefixCls}-line`}
-        style={hover ? { backgroundColor: color } : {}}
+        style={{
+          backgroundColor: (hover || checked) ? color : undefined,
+          top: -position,
+          height: position,
+        }}
       />
 
       <div

@@ -5,6 +5,8 @@
  * @returns {string} 调整后的RGBA颜色字符串
  */
 export function adjustColorOpacity(color: string, opacity = 0.3) {
+  if (!color) return undefined;
+
   if (typeof opacity !== 'number' || opacity < 0 || opacity > 1) {
       throw new Error('透明度必须是0到1之间的数字');
   }

@@ -37,7 +37,6 @@ interface Tick {
   time: Dayjs;
 }
 
-
 interface BaseProps {
    /** 额外的样式类 */
   className?: string;
@@ -50,7 +49,7 @@ interface BaseProps {
   prefixCls?: string;
 }
 
-interface TimeLineProps extends BaseProps {
+interface TimeLineProps<D extends DataItem = DataItem> extends BaseProps {
   /**
    * 是否可移动
    * @default true
@@ -62,12 +61,16 @@ interface TimeLineProps extends BaseProps {
    */
   zoomable?: boolean;
   /** 数据 */
-  data: DataItem[];
+  data: D[];
   /**
    * 默认颜色
    * @default #2B6DE5
    */
   defaultColor?: string;
+  /**
+   * 选择事件
+   */
+  onSelect?: (data: D | null) => void;
 }
 
 interface TimeAxisProps extends Omit<BaseProps, 'prefixCls'> {
@@ -79,6 +82,8 @@ interface TimeAxisProps extends Omit<BaseProps, 'prefixCls'> {
 interface TimePointProps extends Omit<BaseProps, 'prefixCls'> {
   /** 是否 Hover */
   hover?: boolean;
+  /** 当前是否选中 */
+  checked?: boolean;
   /** 卡片数据 */
   data: DataItem;
 }
@@ -86,8 +91,15 @@ interface TimePointProps extends Omit<BaseProps, 'prefixCls'> {
 interface TimeCardProps extends Omit<BaseProps, 'prefixCls'> {
   /** 是否 Hover */
   hover?: boolean;
+  /** 当前是否选中 */
+  checked?: boolean;
   /** 卡片数据 */
   data: DataItem;
+  /**
+   * 卡片位置
+   * @default 24
+   */
+  position?: number;
 }
 
 export type {

@@ -8,7 +8,7 @@ import { adjustColorOpacity } from '../../utils';
 import './styles/index.less';
 
 export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
-  const { className, style, data, hover, ...rest } = props;
+  const { className, style, data, checked, hover, ...rest } = props;
   const { getPrefixCls, defaultColor } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-point');
 
@@ -18,14 +18,10 @@ export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
   if (isRange) {
     return (
       <div
-        className={clsx({
-          [prefixCls]: true,
-          [`${prefixCls}-range`]: true,
-          [`${prefixCls}-hover`]: hover,
-        }, className)}
+        className={clsx(prefixCls, `${prefixCls}-range`, className)}
         style={{
           ...style,
-          backgroundColor: color && hover ? adjustColorOpacity(color) : undefined
+          backgroundColor: (hover || checked) ? adjustColorOpacity(color) : undefined
         }}
         {...rest}
       >
@@ -33,14 +29,14 @@ export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
           className={`${prefixCls}-dot`}
           title={dayjs(time[0]).format(DEFAULT_FORMAT)}
           style={{
-            backgroundColor: hover ? color : undefined,
+            backgroundColor: (hover || checked) ? color : undefined,
           }}
         />
         <div
           className={`${prefixCls}-dot`}
           title={dayjs(time[1]).format(DEFAULT_FORMAT)}
           style={{
-            backgroundColor: hover ? color : undefined,
+            backgroundColor: (hover || checked) ? color : undefined,
           }}
         />
       </div>
@@ -49,14 +45,10 @@ export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
 
   return (
     <div
-      className={clsx({
-        [prefixCls]: true,
-        [`${prefixCls}-dot`]: true,
-        [`${prefixCls}-hover`]: hover,
-      }, className)}
+      className={clsx(prefixCls, `${prefixCls}-dot`, className)}
       style={{
         ...style,
-        backgroundColor: hover ? color : undefined,
+        backgroundColor: (hover || checked) ? color : undefined,
       }}
       title={dayjs(time as Time).format(DEFAULT_FORMAT)}
     />

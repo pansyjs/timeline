@@ -10,6 +10,11 @@ const data: TimeLineProps['data'] = [
     time: '2024-03-10 10:00:00',
   },
   {
+    id: '1111',
+    title: '单点事件',
+    time: '2024-03-10 10:01:00',
+  },
+  {
     id: '2',
     title: '时间范围事件',
     color: '#A140E7',
