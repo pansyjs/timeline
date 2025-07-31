@@ -120,54 +120,55 @@ export function TimeLine(props: TimeLineProps) {
         }}
       >
         <TimeAxis timeRange={timeRange} />
+        <div className={`${prefixCls}-cointent`}>
+          {timeRange && data.map((item, index) => {
+            const { time, id } = item;
 
-        {timeRange && data.map((item, index) => {
-          const { time, id } = item;
-
-          const position = calculatePositionFromTime({
-            targetTime: Array.isArray(time) ? time[0] : time,
-            baseTime: timeRange.start,
-            tickIntervalMs: 1000 * 60,
-            tickWidth: AXIS_CONFIG.width,
-            tickGap: 8,
-            paddingStart: AXIS_CONFIG.paddingStart,
-            potSize: POINT_SIZE,
-          });
-
-          let width: undefined | number = undefined;
-
-          if (Array.isArray(time) && time.length === 2) {
-            width = calculateWidthFormTimeRange({
-              timeRange: {
-                start: time[0],
-                end: time[1],
-              },
+            const position = calculatePositionFromTime({
+              targetTime: Array.isArray(time) ? time[0] : time,
+              baseTime: timeRange.start,
               tickIntervalMs: 1000 * 60,
               tickWidth: AXIS_CONFIG.width,
               tickGap: 8,
+              paddingStart: AXIS_CONFIG.paddingStart,
+              potSize: POINT_SIZE,
             });
-          }
 
-          return (
-            <React.Fragment key={id || index}>
-              <TimePoint
-                style={{
-                  transform: `translateX(${position}px)`,
-                  width: width ? `${width}px` : undefined,
-                }}
-                time={time}
-              />
+            let width: undefined | number = undefined;
 
-              <TimeCard
-                style={{
-                  transform: `translateX(${position + 4}px)`,
-                  top: 105,
-                }}
-                data={item}
-              />
-            </React.Fragment>
-          )
-        })}
+            if (Array.isArray(time) && time.length === 2) {
+              width = calculateWidthFormTimeRange({
+                timeRange: {
+                  start: time[0],
+                  end: time[1],
+                },
+                tickIntervalMs: 1000 * 60,
+                tickWidth: AXIS_CONFIG.width,
+                tickGap: 8,
+              });
+            }
+
+            return (
+              <React.Fragment key={id || index}>
+                <TimePoint
+                  style={{
+                    transform: `translateX(${position}px)`,
+                    width: width ? `${width}px` : undefined,
+                  }}
+                  time={time}
+                />
+
+                <TimeCard
+                  style={{
+                    transform: `translateX(${position + 4}px)`,
+                    top: 50,
+                  }}
+                  data={item}
+                />
+              </React.Fragment>
+            )
+          })}
+        </div>
       </TimeLineContext.Provider>
     </div>
   );

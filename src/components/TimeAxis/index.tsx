@@ -69,7 +69,6 @@ export function TimeAxis(props: TimeAxisProps) {
       className={prefixCls}
       style={{
         width: `${ticksVirtualizer.getTotalSize()}px`,
-        position: 'relative',
       }}
     >
       {ticksVirtualizer.getVirtualItems().map((virtualColumn) => {
