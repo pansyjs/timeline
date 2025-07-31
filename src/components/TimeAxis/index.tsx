@@ -11,10 +11,9 @@ import './style/index.less';
 export function TimeAxis(props: TimeAxisProps) {
   const { timeRange, children } = props;
 
-  const axisRef = React.useRef<HTMLDivElement>(null);
   /** 时间粒度（默认1分钟） */
   const [granularity, setGranularity] = React.useState(0);
-  const { getPrefixCls } = React.useContext(TimeLineContext);
+  const { getPrefixCls, rootElement } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-axis');
 
   const generateTicks = React.useCallback(
@@ -43,7 +42,7 @@ export function TimeAxis(props: TimeAxisProps) {
   const ticksVirtualizer = useVirtualizer({
     horizontal: true,
     count: ticks.length,
-    getScrollElement: () => axisRef.current,
+    getScrollElement: () => rootElement,
     estimateSize: () => 1,
     gap: 8,
     paddingStart: AXIS_CONFIG.paddingStart,
@@ -66,45 +65,43 @@ export function TimeAxis(props: TimeAxisProps) {
   )
 
   return (
-    <div className={prefixCls} ref={axisRef}>
-      <div
-        className={`${prefixCls}-ticks`}
-        style={{
-          width: `${ticksVirtualizer.getTotalSize()}px`,
-          position: 'relative',
-        }}
-      >
-        {ticksVirtualizer.getVirtualItems().map((virtualColumn) => {
-          const { index, key } = virtualColumn;
-          const { time } = ticks[index];
-          const { labelStep, majorLabelFormat, minorLabelFormat } = GRANULARITIES[granularity];
+    <div
+      className={prefixCls}
+      style={{
+        width: `${ticksVirtualizer.getTotalSize()}px`,
+        position: 'relative',
+      }}
+    >
+      {ticksVirtualizer.getVirtualItems().map((virtualColumn) => {
+        const { index, key } = virtualColumn;
+        const { time } = ticks[index];
+        const { labelStep, majorLabelFormat, minorLabelFormat } = GRANULARITIES[granularity];
 
-          const majorLabel = dayjs(time).format(majorLabelFormat);
-          const minorLabel = dayjs(time).format(minorLabelFormat);
-          const showLabel = index % labelStep === 0;
+        const majorLabel = dayjs(time).format(majorLabelFormat);
+        const minorLabel = dayjs(time).format(minorLabelFormat);
+        const showLabel = index % labelStep === 0;
 
-          return (
-            <div
-              className={clsx(`${prefixCls}-tick`, {
-                [`${prefixCls}-tick-major`]: showLabel,
-                [`${prefixCls}-tick-big-major`]: index === 0,
-              })}
-              key={key}
-              data-index={index}
-              ref={ticksVirtualizer.measureElement}
-              style={{
-                transform: `translateX(${virtualColumn.start}px)`,
-              }}
-            >
-              {showLabel && (
-                <div className={`${prefixCls}-tick-lable`}>
-                  {index === 0 ? majorLabel : minorLabel}
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
+        return (
+          <div
+            className={clsx(`${prefixCls}-tick`, {
+              [`${prefixCls}-tick-major`]: showLabel,
+              [`${prefixCls}-tick-big-major`]: index === 0,
+            })}
+            key={key}
+            data-index={index}
+            ref={ticksVirtualizer.measureElement}
+            style={{
+              transform: `translateX(${virtualColumn.start}px)`,
+            }}
+          >
+            {showLabel && (
+              <div className={`${prefixCls}-tick-lable`}>
+                {index === 0 ? majorLabel : minorLabel}
+              </div>
+            )}
+          </div>
+        )
+      })}
       {children}
     </div>
   )

@@ -3,18 +3,21 @@
 @time-line-prefix-cls: ~'@{root-prefix}-timeline-card';
 
 .@{time-line-prefix-cls} {
-  position: relative;
+  position: absolute;
+  pointer-events: auto;
 
   &-line {
     position: absolute;
-    top: -30px;
+    top: -50px;
     left: 0;
     width: 1px;
-    height: 30px;
+    height: 50px;
     background-color: @color-line;
   }
 
   &-cntent {
+    cursor: default;
+    user-select: none;
     position: relative;
     overflow: hidden;
     background-color: @color-white;

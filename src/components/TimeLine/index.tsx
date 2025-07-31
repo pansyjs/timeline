@@ -115,58 +115,59 @@ export function TimeLine(props: TimeLineProps) {
       <TimeLineContext.Provider
         value={{
           prefixCls,
-          getPrefixCls
+          getPrefixCls,
+          rootElement: rootRef.current!
         }}
       >
-        <TimeAxis timeRange={timeRange}>
-          {timeRange && data.map((item) => {
-            const { time, id } = item;
+        <TimeAxis timeRange={timeRange} />
 
-            const position = calculatePositionFromTime({
-              targetTime: Array.isArray(time) ? time[0] : time,
-              baseTime: timeRange.start,
+        {timeRange && data.map((item, index) => {
+          const { time, id } = item;
+
+          const position = calculatePositionFromTime({
+            targetTime: Array.isArray(time) ? time[0] : time,
+            baseTime: timeRange.start,
+            tickIntervalMs: 1000 * 60,
+            tickWidth: AXIS_CONFIG.width,
+            tickGap: 8,
+            paddingStart: AXIS_CONFIG.paddingStart,
+            potSize: POINT_SIZE,
+          });
+
+          let width: undefined | number = undefined;
+
+          if (Array.isArray(time) && time.length === 2) {
+            width = calculateWidthFormTimeRange({
+              timeRange: {
+                start: time[0],
+                end: time[1],
+              },
               tickIntervalMs: 1000 * 60,
               tickWidth: AXIS_CONFIG.width,
               tickGap: 8,
-              paddingStart: AXIS_CONFIG.paddingStart,
-              potSize: POINT_SIZE,
             });
+          }
 
-            let width: undefined | number = undefined;
-
-            if (Array.isArray(time) && time.length === 2) {
-              width = calculateWidthFormTimeRange({
-                timeRange: {
-                  start: time[0],
-                  end: time[1],
-                },
-                tickIntervalMs: 1000 * 60,
-                tickWidth: AXIS_CONFIG.width,
-                tickGap: 8,
-              });
-            }
-
-            return (
+          return (
+            <React.Fragment key={id || index}>
               <TimePoint
                 style={{
                   transform: `translateX(${position}px)`,
                   width: width ? `${width}px` : undefined,
                 }}
-                key={id}
                 time={time}
               />
-            )
-          })}
-        </TimeAxis>
 
-        <div style={{ padding: 24, display: 'flex', gap: 8 }}>
-          {data.map((item) => {
-            return (
-              <TimeCard key={item.id} data={item} />
-            )
-          })}
-        </div>
-
+              <TimeCard
+                style={{
+                  transform: `translateX(${position + 4}px)`,
+                  top: 105,
+                }}
+                data={item}
+              />
+            </React.Fragment>
+          )
+        })}
       </TimeLineContext.Provider>
     </div>
   );
