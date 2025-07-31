@@ -1,4 +1,5 @@
 import type { TimeAxisProps, Tick } from '../../types';
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { clsx } from 'clsx';
 import React from 'react';
 import dayjs from 'dayjs';
@@ -23,9 +24,9 @@ export function TimeAxis(props: TimeAxisProps) {
         return ticks;
       }
 
-      const { step, unit } = GRANULARITIES[granularity]
+      const { step, scale } = GRANULARITIES[granularity]
 
-      for (let time = times[0]; time.isBefore(times[1]); time = time.add(step, unit)) {
+      for (let time = times[0]; time.isBefore(times[1]); time = time.add(step, scale)) {
         ticks.push({
           time,
         });
@@ -38,14 +39,38 @@ export function TimeAxis(props: TimeAxisProps) {
 
   const ticks = generateTicks();
 
-  if (ticks.length === 0) return null;
+  const ticksVirtualizer = useVirtualizer({
+    horizontal: true,
+    count: ticks.length,
+    getScrollElement: () => axisRef.current,
+    estimateSize: () => 1,
+    gap: 8,
+    paddingStart: 48,
+    paddingEnd: 48,
+  });
+
+  React.useEffect(
+    () => {
+      setTimeout(() => {
+        ticksVirtualizer.scrollBy(1300, { behavior: 'smooth'  })
+      }, 1000 * 5)
+    },
+    []
+  )
 
   return (
     <div className={prefixCls} ref={axisRef}>
-      <div className={`${prefixCls}-ticks`}>
-        {ticks.map((item, index) => {
-          const { time } = item;
-          const { labelStep, majorLabelFormat, minorLabelFormat } = GRANULARITIES[granularity]
+      <div
+        className={`${prefixCls}-ticks`}
+        style={{
+          width: `${ticksVirtualizer.getTotalSize()}px`,
+          position: 'relative',
+        }}
+      >
+        {ticksVirtualizer.getVirtualItems().map((virtualColumn) => {
+          const { index, key } = virtualColumn;
+          const { time } = ticks[index];
+          const { labelStep, majorLabelFormat, minorLabelFormat } = GRANULARITIES[granularity];
 
           const majorLabel = dayjs(time).format(majorLabelFormat);
           const minorLabel = dayjs(time).format(minorLabelFormat);
@@ -57,7 +82,14 @@ export function TimeAxis(props: TimeAxisProps) {
                 [`${prefixCls}-tick-major`]: showLabel,
                 [`${prefixCls}-tick-big-major`]: index === 0,
               })}
-              key={index}
+              key={key}
+              data-index={index}
+              ref={ticksVirtualizer.measureElement}
+              style={{
+                height: '100%',
+                width: `${ticks[index]}px`,
+                transform: `translateX(${virtualColumn.start}px)`,
+              }}
             >
               {showLabel && (
                 <div className={`${prefixCls}-tick-lable`}>
@@ -66,7 +98,7 @@ export function TimeAxis(props: TimeAxisProps) {
               )}
             </div>
           )
-        })}
+          })}
       </div>
     </div>
   )
