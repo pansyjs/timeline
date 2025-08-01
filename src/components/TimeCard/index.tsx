@@ -71,6 +71,7 @@ function TimeCardInternal<D extends DataItem = DataItem>(
         style={{
           ...style,
           top: position,
+          zIndex: checked ? 50 : undefined
         }}
         ref={ref}
         {...rest}

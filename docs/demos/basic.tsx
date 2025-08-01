@@ -52,7 +52,7 @@ function Demo() {
             style={{
               background: '#fff',
               width: 180,
-              height: 80,
+              height: 100,
               borderLeft: `3px solid ${data.color}`
             }}
           >
