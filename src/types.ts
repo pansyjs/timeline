@@ -2,6 +2,7 @@ import React from 'react';
 import type { ConfigType, Dayjs } from 'dayjs';
 
 type Time = NonNullable<ConfigType>;
+type Key = number | string | bigint
 
 interface Rect {
   width: number
@@ -28,6 +29,11 @@ interface DataItem {
   title: string;
   /** 颜色 */
   color?: string,
+  /**
+   * 是否使用全局的自定义渲染
+   * @default true
+   */
+  customRender?: boolean;
   /**
    * 时间
    *  - 数组表示该事件为持续事件
@@ -72,6 +78,8 @@ interface TimeLineProps<D extends DataItem = DataItem> extends BaseProps {
    * @default #2B6DE5
    */
   defaultColor?: string;
+  /** 自定义渲染卡片 */
+  renderCard?: TimeCardProps<D>['render'];
   /**
    * 选择事件
    */
@@ -93,18 +101,19 @@ interface TimePointProps extends Omit<BaseProps, 'prefixCls'> {
   data: DataItem;
 }
 
-interface TimeCardProps extends Omit<BaseProps, 'prefixCls'> {
+interface TimeCardProps<D extends DataItem = DataItem> extends Omit<BaseProps, 'prefixCls'> {
   /** 是否 Hover */
   hover?: boolean;
   /** 当前是否选中 */
   checked?: boolean;
   /** 卡片数据 */
-  data: DataItem;
+  data: D;
   /**
    * 卡片位置
    * @default 24
    */
   position?: number;
+  render?: (data: D) => React.ReactNode;
 }
 
 export type {
@@ -119,4 +128,5 @@ export type {
   TimeRange,
   TimeRangeDayJS,
   Rect,
+  Key,
 }
