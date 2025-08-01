@@ -6,7 +6,8 @@ import { DEFAULT_FORMAT } from '../../config';
 import React from 'react';
 import './style/index.less';
 
-export function TimeCard(props: TimeCardProps & React.ComponentProps<'div'>) {
+export const TimeCard = React.forwardRef<HTMLDivElement, TimeCardProps & React.ComponentProps<'div'>>(
+  (props, ref) => {
   const { className, style, hover, data, checked, position= 24, ...rest } = props;
 
   const { getPrefixCls, defaultColor } = React.useContext(TimeLineContext);
@@ -28,37 +29,41 @@ export function TimeCard(props: TimeCardProps & React.ComponentProps<'div'>) {
       return prev ? prev + ' ~ ' + timeStr : prev + timeStr;
     }, '');
 
-  return (
-    <div
-      className={clsx(prefixCls, className)}
-      style={{
-        ...style,
-        top: position,
-      }}
-      {...rest}
-    >
+    return (
       <div
-        className={`${prefixCls}-line`}
+        className={clsx(prefixCls, className)}
         style={{
-          backgroundColor: (hover || checked) ? color : undefined,
-          top: -position,
-          height: position,
+          ...style,
+          top: position,
         }}
-      />
-
-      <div
-        className={`${prefixCls}-cntent`}
-        style={{
-          borderColor: color,
-        }}
+        ref={ref}
+        {...rest}
       >
-        <div className={`${prefixCls}-title`}>
-          {data?.title}
-        </div>
-        <div className={`${prefixCls}-time`}>
-          {timeStr}
+        <div
+          className={`${prefixCls}-line`}
+          style={{
+            backgroundColor: (hover || checked) ? color : undefined,
+            top: -position,
+            height: position,
+          }}
+        />
+
+        <div
+          className={`${prefixCls}-cntent`}
+          style={{
+            borderColor: color,
+          }}
+        >
+          <div className={`${prefixCls}-title`}>
+            {data?.title}
+          </div>
+          <div className={`${prefixCls}-time`}>
+            {timeStr}
+          </div>
         </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
+);
+
+TimeCard.displayName = 'TimeCard';

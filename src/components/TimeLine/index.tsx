@@ -187,6 +187,9 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                     transform: `translateX(${position + 4}px)`,
                   }}
                   position={index % 2 ? 24 : 100}
+                  ref={(node) => {
+                    console.log(node);
+                  }}
                   hover={item.id === hoverItem?.id}
                   checked={item.id === selectItem?.id}
                   data={item}

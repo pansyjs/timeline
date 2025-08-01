@@ -3,6 +3,11 @@ import type { ConfigType, Dayjs } from 'dayjs';
 
 type Time = NonNullable<ConfigType>;
 
+interface Rect {
+  width: number
+  height: number
+}
+
 interface TimeRange {
   start: Time;
   end: Time;
@@ -113,4 +118,5 @@ export type {
   Tick,
   TimeRange,
   TimeRangeDayJS,
+  Rect,
 }
