@@ -16,13 +16,6 @@ export function isOverlappingX(a: VirtualItem, b: VirtualItem) {
 }
 
 /**
- * 获取开始时间
- */
-export function getStartTime(time: DataItem['time']) {
-  return Array.isArray(time) ? time[0] : time;
-}
-
-/**
  * 通过节点获取唯一标识
  * @param node
  * @param attributeKey

@@ -174,3 +174,10 @@ export function calculateWidthFormTimeRange(opts: CalculateWidthFormTimeRangeOpt
 
   return ticksCount * (tickWidth + tickGap) + tickGap;
 }
+
+/**
+ * 获取开始时间
+ */
+export function getStartTime(time: DataItem['time']) {
+  return Array.isArray(time) ? time[0] : time;
+}

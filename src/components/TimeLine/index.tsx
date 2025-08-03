@@ -7,7 +7,6 @@ import type {
   VirtualItem,
 } from '../../types';
 import React from 'react';
-import dayjs from 'dayjs';
 import { clsx } from 'clsx';
 import { isEqual, omit } from 'es-toolkit'
 import interact from 'interactjs';
@@ -28,9 +27,10 @@ import {
   getPrefixCls as getPrefixClsUtil,
   calculatePositionFromTime,
   calculateWidthFormTimeRange,
+  getStartTime,
 } from '../../utils';
 import { emitter, measureElement as measureElementUtil, getRect } from '../../utils';
-import { isOverlappingX, getStartTime, keyFromElement } from './utils';
+import { isOverlappingX, keyFromElement } from './utils';
 import './style/index.less';
 
 export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>) {
@@ -255,9 +255,8 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     itemRectCache.forEach((item) => {
       virtualItems.push(item);
     });
-
     const sortedVirtualItems = virtualItems.sort((a, b) => {
-      return dayjs(getStartTime(a.x)).isBefore(dayjs(getStartTime(b.x))) ? -1 : 1
+      return a.x - b.x;
     });
 
     // 跟踪每列的最大Y坐标（用于堆叠重叠的卡片）
@@ -335,7 +334,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
             const positionY = itemRectCache.get(item.id)?.y || 20;
 
             const position = calculatePositionFromTime({
-              targetTime: Array.isArray(time) ? time[0] : time,
+              targetTime: getStartTime(time),
               baseTime: timeRange.start,
               tickIntervalMs: 1000 * 60,
               tickWidth: AXIS_CONFIG.width,
