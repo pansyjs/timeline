@@ -20,7 +20,7 @@ export default {
         assets: ['CHANGELOG.md', 'package.json'],
         message:
           // eslint-disable-next-line no-template-curly-in-string
-          'chore(release): ${nextRelease.gitTag} [skip ci] \n\n${nextRelease.notes}',
+          'chore(release): ${nextRelease.gitTag} [skip ci]',
       },
     ],
   ],
