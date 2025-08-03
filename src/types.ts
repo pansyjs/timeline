@@ -110,6 +110,7 @@ interface TimePointProps extends Omit<BaseProps, 'prefixCls'> {
   checked?: boolean;
   /** 卡片数据 */
   data: DataItem;
+  defaultColor?: string;
 }
 
 interface TimeCardProps<D extends DataItem = DataItem> extends Omit<BaseProps, 'prefixCls'> {
@@ -117,6 +118,7 @@ interface TimeCardProps<D extends DataItem = DataItem> extends Omit<BaseProps, '
   hover?: boolean;
   /** 当前是否选中 */
   checked?: boolean;
+  defaultColor?: string;
   /** 卡片数据 */
   data: D;
   /**

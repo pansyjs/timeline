@@ -1,11 +1,14 @@
 import type {
   DataItem,
   Key,
+  Tick,
   TimeCardProps,
   TimeLineProps,
   VirtualItem,
 } from '@/types';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { clsx } from 'clsx';
+import dayjs from 'dayjs';
 import { isEqual, omit } from 'es-toolkit';
 import interact from 'interactjs';
 import React from 'react';
@@ -13,6 +16,7 @@ import {
   AXIS_CONFIG,
   DEFAULT_COLOR,
   defaultPrefixCls,
+  GRANULARITIES,
   POINT_SIZE,
   SIZE_CONFIG,
 } from '@/config';
@@ -20,7 +24,6 @@ import {
   calculatePositionFromTime,
   calculateTimeRange,
   calculateWidthFormTimeRange,
-  emitter,
   getPrefixCls as getPrefixClsUtil,
   getRect,
   getStartTime,
@@ -28,7 +31,6 @@ import {
   measureElement as measureElementUtil,
 } from '@/utils';
 import { TimeLineContext } from '../context';
-import { TimeAxis } from '../TimeAxis';
 import { TimeCard } from '../TimeCard';
 import { TimePoint } from '../TimePoint';
 import { keyFromElement, splitOverlappingItems } from './utils';
@@ -61,12 +63,38 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
   const [isDragging, setIsDragging] = React.useState(false);
   const [hoverItem, setHoverItem] = React.useState<D | null>(null);
   const [selectItem, setSelectItem] = React.useState<D | null>(null);
+  /** 时间粒度（默认1分钟） */
+  const [granularity] = React.useState(0);
 
   const timeRange = calculateTimeRange(data, {
     padding: 30,
     minRange: 60 * 24,
     defaultCenter: new Date(),
   });
+
+  const generateTicks = React.useCallback(
+    () => {
+      const ticks: Tick[] = [];
+
+      if (!timeRange) {
+        return ticks;
+      }
+
+      const { step, scale } = GRANULARITIES[granularity];
+
+      for (let time = timeRange.start; time.isBefore(timeRange.end); time = time.add(step, scale)) {
+        ticks.push({
+          time,
+        });
+      }
+
+      return ticks;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timeRange],
+  );
+
+  const ticks = generateTicks();
 
   const getPrefixCls = React.useCallback(
     (suffixCls?: string) => {
@@ -77,11 +105,25 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
 
   const prefixCls = getPrefixCls('timeline');
 
+  const ticksVirtualizer = useVirtualizer({
+    horizontal: true,
+    count: ticks.length,
+    getScrollElement: () => rootRef.current,
+    estimateSize: () => 1,
+    gap: 8,
+    paddingStart: AXIS_CONFIG.paddingStart,
+    paddingEnd: AXIS_CONFIG.paddingEnd,
+  });
+
   function onMouseWheel(e: WheelEvent) {
     e.preventDefault();
 
     // console.log('deltaX', event.deltaX, 'deltaY', event.deltaY);
   }
+
+  const handlePanMove = (e: any) => {
+    ticksVirtualizer.scrollToOffset(ticksVirtualizer.scrollOffset + e.dx);
+  };
 
   React.useEffect(
     () => {
@@ -95,21 +137,18 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
           lockAxis: 'x',
           inertia: true,
           listeners: {
-            start(e) {
-              if (!moveable)
-                return;
-              emitter.emit('panstart', e);
-            },
+            // start(e) {
+            //   if (!moveable) return;
+            // },
             move(e) {
               if (!moveable)
                 return;
-              emitter.emit('panmove', e);
+              handlePanMove(e);
             },
-            end(e) {
-              if (!moveable)
-                return;
-              emitter.emit('panend', e);
-            },
+            // end(e) {
+            //   if (!moveable)
+            //     return;
+            // },
           },
         })
         .on('mousedown', () => {
@@ -317,20 +356,16 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
 
       _measureElement(node, undefined);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
-  const contextValue = React.useMemo(
-    () => {
-      return {
-        prefixCls,
-        getPrefixCls,
-        defaultColor,
-        rootElement: rootRef.current!,
-      };
-    },
-    [prefixCls, getPrefixCls, defaultColor],
-  );
+  const contextValue = React.useMemo(() => {
+    return {
+      prefixCls,
+      getPrefixCls,
+    };
+  }, [prefixCls, getPrefixCls]);
 
   return (
     <div
@@ -342,7 +377,43 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
       }}
     >
       <TimeLineContext.Provider value={contextValue}>
-        <TimeAxis timeRange={timeRange} />
+        <div
+          className={`${prefixCls}-axis`}
+          style={{
+            width: `${ticksVirtualizer.getTotalSize()}px`,
+          }}
+        >
+          {ticksVirtualizer.getVirtualItems().map((virtualColumn) => {
+            const { index, key } = virtualColumn;
+            const { time } = ticks[index];
+            const { labelStep, majorLabelFormat, minorLabelFormat } = GRANULARITIES[granularity];
+
+            const majorLabel = dayjs(time).format(majorLabelFormat);
+            const minorLabel = dayjs(time).format(minorLabelFormat);
+            const showLabel = index % labelStep === 0;
+
+            return (
+              <div
+                className={clsx(`${prefixCls}-axis-tick`, {
+                  [`${prefixCls}-axis-tick-major`]: showLabel,
+                  [`${prefixCls}-axis-tick-big-major`]: index === 0,
+                })}
+                key={key}
+                data-index={index}
+                ref={ticksVirtualizer.measureElement}
+                style={{
+                  transform: `translateX(${virtualColumn.start}px)`,
+                }}
+              >
+                {showLabel && (
+                  <div className={`${prefixCls}-axis-tick-lable`}>
+                    {index === 0 ? majorLabel : minorLabel}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
         <div className={`${prefixCls}-content`} ref={contentRef}>
           {timeRange && data.map((item, index) => {
             const { time, id } = item;
@@ -398,6 +469,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                   hover={item.id === hoverItem?.id}
                   checked={item.id === selectItem?.id}
                   data={item}
+                  defaultColor={defaultColor}
                   onMouseEnter={() => { handleHover(item as D); }}
                   onMouseLeave={() => { handleHover(null); }}
                   onClick={() => { handleClick(item as D); }}

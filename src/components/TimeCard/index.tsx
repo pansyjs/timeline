@@ -2,7 +2,7 @@ import type { DataItem, TimeCardProps } from '@/types';
 import { clsx } from 'clsx';
 import dayjs from 'dayjs';
 import React from 'react';
-import { DEFAULT_FORMAT } from '@/config';
+import { DEFAULT_COLOR, DEFAULT_FORMAT } from '@/config';
 import { TimeLineContext } from '../context';
 import './style/index.less';
 
@@ -15,13 +15,14 @@ function TimeCardInternal<D extends DataItem = DataItem>(
     style,
     hover,
     data,
+    defaultColor = DEFAULT_COLOR,
     checked,
     position = 24,
     render,
     ...rest
   } = props;
 
-  const { getPrefixCls, defaultColor } = React.useContext(TimeLineContext);
+  const { getPrefixCls } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-card');
 
   const { color = defaultColor, customRender = true, time } = data;

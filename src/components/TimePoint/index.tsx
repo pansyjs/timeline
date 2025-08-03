@@ -2,14 +2,22 @@ import type { Time, TimePointProps } from '@/types';
 import { clsx } from 'clsx';
 import dayjs from 'dayjs';
 import React from 'react';
-import { DEFAULT_FORMAT } from '@/config';
+import { DEFAULT_COLOR, DEFAULT_FORMAT } from '@/config';
 import { adjustColorOpacityMemoize } from '@/utils';
 import { TimeLineContext } from '../context';
 import './styles/index.less';
 
 export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
-  const { className, style, data, checked, hover, ...rest } = props;
-  const { getPrefixCls, defaultColor } = React.useContext(TimeLineContext);
+  const {
+    className,
+    style,
+    data,
+    checked,
+    defaultColor = DEFAULT_COLOR,
+    hover,
+    ...rest
+  } = props;
+  const { getPrefixCls } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-point');
 
   const { time, color = defaultColor } = data;
