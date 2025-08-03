@@ -1,35 +1,37 @@
 import type {
-  TimeLineProps,
-  TimeAxisProps,
   DataItem,
   Key,
+  TimeAxisProps,
   TimeCardProps,
+  TimeLineProps,
   VirtualItem,
 } from '../../types';
-import React from 'react';
 import { clsx } from 'clsx';
-import { isEqual, omit } from 'es-toolkit'
+import { isEqual, omit } from 'es-toolkit';
 import interact from 'interactjs';
-import { TimeCard } from '../TimeCard';
-import { TimeAxis } from '../TimeAxis';
-import { TimePoint } from '../TimePoint';
-import { TimeLineContext } from '../context';
+import React from 'react';
 import {
-  defaultPrefixCls,
   AXIS_CONFIG,
-  POINT_SIZE,
   DEFAULT_COLOR,
+  defaultPrefixCls,
+  POINT_SIZE,
   SIZE_CONFIG,
 } from '../../config';
 import {
-  getWheelType,
-  calculateTimeRange,
-  getPrefixCls as getPrefixClsUtil,
   calculatePositionFromTime,
+  calculateTimeRange,
   calculateWidthFormTimeRange,
+  emitter,
+  getPrefixCls as getPrefixClsUtil,
+  getRect,
   getStartTime,
+  getWheelType,
+  measureElement as measureElementUtil,
 } from '../../utils';
-import { emitter, measureElement as measureElementUtil, getRect } from '../../utils';
+import { TimeLineContext } from '../context';
+import { TimeAxis } from '../TimeAxis';
+import { TimeCard } from '../TimeCard';
+import { TimePoint } from '../TimePoint';
 import { isOverlappingX, keyFromElement, splitOverlappingItems } from './utils';
 import './style/index.less';
 
@@ -50,21 +52,21 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
   const contentRef = React.useRef<HTMLDivElement>(null);
   const [elementsCache] = React.useState(
     () => new Map<Key, HTMLDivElement>(),
-  )
+  );
   const [itemRectCache] = React.useState(
     () => new Map<Key, VirtualItem>(),
-  )
-  const rerender = React.useReducer(() => ({}), {})[1]
+  );
+  const rerender = React.useReducer(() => ({}), {})[1];
   const [isDragging, setIsDragging] = React.useState(false);
   const [hoverItem, setHoverItem] = React.useState<D | null>(null);
-  const [selectItem, setSelectItem] = React.useState<D | null>(null)
+  const [selectItem, setSelectItem] = React.useState<D | null>(null);
   const [timeRange, setTimeRange] = React.useState<TimeAxisProps['timeRange']>();
 
   const getPrefixCls = React.useCallback(
     (suffixCls?: string) => {
       return getPrefixClsUtil(suffixCls, customPrefixCls);
     },
-    [customPrefixCls]
+    [customPrefixCls],
   );
 
   const prefixCls = getPrefixCls('timeline');
@@ -78,7 +80,8 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
   React.useEffect(
     () => {
       const root = rootRef.current;
-      if (!root) return;
+      if (!root)
+        return;
 
       interact(root)
         .styleCursor(false)
@@ -87,37 +90,40 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
           inertia: true,
           listeners: {
             start(e) {
-              if (!moveable) return;
+              if (!moveable)
+                return;
               emitter.emit('panstart', e);
             },
             move(e) {
-              if (!moveable) return;
+              if (!moveable)
+                return;
               emitter.emit('panmove', e);
             },
             end(e) {
-              if (!moveable) return;
+              if (!moveable)
+                return;
               emitter.emit('panend', e);
             },
           },
         })
-        .on('mousedown', function() {
+        .on('mousedown', () => {
           setIsDragging(true);
         })
-        .on('mouseup', function() {
+        .on('mouseup', () => {
           setIsDragging(false);
         });
 
       const wheelType = getWheelType();
 
-      root.addEventListener(wheelType as 'wheel', onMouseWheel, false)
+      root.addEventListener(wheelType as 'wheel', onMouseWheel, false);
 
       return () => {
         interact(root).unset();
-        root.removeEventListener(wheelType as 'wheel', onMouseWheel, false)
-      }
+        root.removeEventListener(wheelType as 'wheel', onMouseWheel, false);
+      };
     },
-    []
-  )
+    [],
+  );
 
   React.useEffect(
     () => {
@@ -129,22 +135,22 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
 
       setTimeRange(timeRange);
     },
-    [data]
+    [data],
   );
 
   const handleHover = (item: D | null) => {
     setHoverItem(item);
-  }
+  };
 
   const handleClick = (item: D) => {
     if (selectItem?.id === item.id) {
       setSelectItem(null);
-      onSelect?.(null)
+      onSelect?.(null);
       return;
     }
     setSelectItem(item);
-    onSelect?.(item)
-  }
+    onSelect?.(item);
+  };
 
   const observer = (() => {
     let _ro: ResizeObserver | null = null;
@@ -155,29 +161,29 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
       }
 
       if (!window.ResizeObserver) {
-        return null
+        return null;
       }
 
       return (_ro = new window.ResizeObserver((entries) => {
         entries.forEach((entry) => {
           const run = () => {
-            _measureElement(entry.target as HTMLDivElement, entry)
-          }
+            _measureElement(entry.target as HTMLDivElement, entry);
+          };
 
           requestAnimationFrame(run);
-        })
-      }))
-    }
+        });
+      }));
+    };
 
     return {
       disconnect: () => {
-        get()?.disconnect()
-        _ro = null
+        get()?.disconnect();
+        _ro = null;
       },
       observe: (target: Element) =>
         get()?.observe(target, { box: 'border-box' }),
       unobserve: (target: Element) => get()?.unobserve(target),
-    }
+    };
   })();
 
   const _measureElement = (
@@ -190,11 +196,11 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
 
     if (prevNode !== node) {
       if (prevNode) {
-        observer.unobserve(prevNode)
+        observer.unobserve(prevNode);
       }
 
-      observer.observe(node)
-      elementsCache.set(key, node)
+      observer.observe(node);
+      elementsCache.set(key, node);
     }
 
     if (node.isConnected) {
@@ -206,8 +212,8 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
         ...rect,
         key,
         x: clientRect.x,
-        y: SIZE_CONFIG.cardFirstRowMargin
-      }
+        y: SIZE_CONFIG.cardFirstRowMargin,
+      };
 
       if (!itemRect) {
         itemRectCache.set(key, domRect);
@@ -229,24 +235,24 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
         // adjustPositions();
       }
     }
-  }
+  };
 
   const measureElement = React.useCallback(
     (node: HTMLDivElement) => {
       if (!node) {
         elementsCache.forEach((cached, key) => {
           if (!cached.isConnected) {
-            observer.unobserve(cached)
-            elementsCache.delete(key)
+            observer.unobserve(cached);
+            elementsCache.delete(key);
           }
-        })
-        return
+        });
+        return;
       }
 
-      _measureElement(node, undefined)
+      _measureElement(node, undefined);
     },
-    []
-  )
+    [],
+  );
 
   /**
    * 布局计算
@@ -254,7 +260,8 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
    */
   const adjustPositions = () => {
     const content = contentRef.current;
-    if (!content) return;
+    if (!content)
+      return;
 
     const containerHeight = getRect(content).height;
     const minY = SIZE_CONFIG.cardFirstRowMargin;
@@ -266,8 +273,6 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     // 内聚重叠
     const splitItems = splitOverlappingItems(Array.from(itemRectCache.values()));
 
-    console.log(splitItems)
-
     // 处理重叠
     // items > 已排序，所有都是重叠的
     splitItems.forEach((items) => {
@@ -275,7 +280,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
 
       /** 当前行 y 坐标 */
       let currentY = cardFirstRowMargin;
-      /** 布局方向，1: 向下；-1: 向上；*/
+      /** 布局方向，1: 向下；-1: 向上； */
       let direction = 1;
 
       items.forEach((item) => {
@@ -287,19 +292,21 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
             itemRectCache.set(item.key, {
               ...itemRectCache.get(item.key)!,
               y: currentY,
-            })
+            });
 
             currentY = nextY;
-          } else {
+          }
+          else {
             direction = -1;
             currentY = containerHeight - cardFirstRowMargin - item.height;
 
             itemRectCache.set(item.key, {
               ...itemRectCache.get(item.key)!,
               y: currentY,
-            })
+            });
           }
-        } else {
+        }
+        else {
           const nextY = (currentY - item.height - cardRowGap);
 
           if (nextY >= cardFirstRowMargin) {
@@ -307,22 +314,23 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
             itemRectCache.set(item.key, {
               ...itemRectCache.get(item.key)!,
               y: currentY,
-            })
-          } else {
+            });
+          }
+          else {
             direction = 1;
             currentY = cardFirstRowMargin;
             itemRectCache.set(item.key, {
               ...itemRectCache.get(item.key)!,
               y: currentY,
-            })
+            });
           }
         }
-      })
+      });
     });
 
     // 触发渲染
     rerender();
-  }
+  };
 
   return (
     <div
@@ -330,7 +338,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
       ref={rootRef}
       style={{
         cursor: isDragging ? 'grabbing' : 'grab',
-        ...style
+        ...style,
       }}
     >
       <TimeLineContext.Provider
@@ -338,7 +346,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
           prefixCls,
           getPrefixCls,
           defaultColor,
-          rootElement: rootRef.current!
+          rootElement: rootRef.current!,
         }}
       >
         <TimeAxis timeRange={timeRange} />
@@ -358,7 +366,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
               potSize: POINT_SIZE,
             });
 
-            let width: undefined | number = undefined;
+            let width: undefined | number;
 
             if (Array.isArray(time) && time.length === 2) {
               width = calculateWidthFormTimeRange({
@@ -382,9 +390,9 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                   data={item}
                   hover={item.id === hoverItem?.id}
                   checked={item.id === selectItem?.id}
-                  onMouseEnter={() => { handleHover(item) }}
-                  onMouseLeave={() => { handleHover(null) }}
-                  onClick={() => { handleClick(item) }}
+                  onMouseEnter={() => { handleHover(item); }}
+                  onMouseLeave={() => { handleHover(null); }}
+                  onClick={() => { handleClick(item); }}
                 />
 
                 <TimeCard
@@ -397,13 +405,13 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                   hover={item.id === hoverItem?.id}
                   checked={item.id === selectItem?.id}
                   data={item}
-                  onMouseEnter={() => { handleHover(item) }}
-                  onMouseLeave={() => { handleHover(null) }}
-                  onClick={() => { handleClick(item) }}
+                  onMouseEnter={() => { handleHover(item); }}
+                  onMouseLeave={() => { handleHover(null); }}
+                  onClick={() => { handleClick(item); }}
                   render={renderCard as TimeCardProps['render']}
                 />
               </React.Fragment>
-            )
+            );
           })}
         </div>
       </TimeLineContext.Provider>

@@ -1,6 +1,6 @@
 import type { VirtualItem } from '../../types';
+import { describe, expect, it } from 'vitest';
 import { splitOverlappingItems } from './utils';
-import { expect, it, describe } from 'vitest';
 
 describe('splitOverlappingItems', () => {
   it('所有元素都重叠', () => {
@@ -40,8 +40,6 @@ describe('splitOverlappingItems', () => {
 
     const splitItems = splitOverlappingItems(items);
 
-    console.log('******', splitItems[1]);
-
     expect(splitItems).toEqual([
       [
         { key: '1', x: 10, y: 10, width: 20, height: 20 },
@@ -50,7 +48,7 @@ describe('splitOverlappingItems', () => {
       [
         { key: '2', x: 100, y: 10, width: 20, height: 20 },
         { key: '4', x: 110, y: 10, width: 20, height: 20 },
-      ]
+      ],
     ]);
   });
-})
+});

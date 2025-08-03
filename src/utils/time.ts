@@ -8,7 +8,6 @@ function isTimeRange(time: DataItem['time']): time is [Time, Time] {
 /**
  * 处理时间范围为整小时
  * @param props
- * @returns
  */
 function processTimeRange(props: TimeRange): TimeRangeDayJS {
   const { start, end } = props;
@@ -138,8 +137,6 @@ export function calculatePositionFromTime(opts: CalculatePositionFromTimeOptions
     paddingStart,
     potSize,
   } = opts;
-
-  console.log('test123');
 
   const targetTimestamp = dayjs(targetTime).valueOf();
   const baseTimestamp = dayjs(baseTime).valueOf();
