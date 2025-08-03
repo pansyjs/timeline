@@ -66,6 +66,14 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
   /** 时间粒度（默认1分钟） */
   const [granularity] = React.useState(0);
 
+  const getPrefixCls = React.useCallback(
+    (suffixCls?: string) => {
+      return getPrefixClsUtil(suffixCls, customPrefixCls);
+    },
+    [customPrefixCls],
+  );
+
+  const prefixCls = getPrefixCls('timeline');
   const timeRange = calculateTimeRange(data, {
     padding: 30,
     minRange: 60 * 24,
@@ -96,15 +104,6 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
 
   const ticks = generateTicks();
 
-  const getPrefixCls = React.useCallback(
-    (suffixCls?: string) => {
-      return getPrefixClsUtil(suffixCls, customPrefixCls);
-    },
-    [customPrefixCls],
-  );
-
-  const prefixCls = getPrefixCls('timeline');
-
   const ticksVirtualizer = useVirtualizer({
     horizontal: true,
     count: ticks.length,
@@ -121,10 +120,6 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     // console.log('deltaX', event.deltaX, 'deltaY', event.deltaY);
   }
 
-  const handlePanMove = (e: any) => {
-    ticksVirtualizer.scrollToOffset(ticksVirtualizer.scrollOffset + e.dx);
-  };
-
   React.useEffect(
     () => {
       const root = rootRef.current;
@@ -137,18 +132,11 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
           lockAxis: 'x',
           inertia: true,
           listeners: {
-            // start(e) {
-            //   if (!moveable) return;
-            // },
             move(e) {
               if (!moveable)
                 return;
-              handlePanMove(e);
+              ticksVirtualizer.scrollToOffset(ticksVirtualizer.scrollOffset + e.dx);
             },
-            // end(e) {
-            //   if (!moveable)
-            //     return;
-            // },
           },
         })
         .on('mousedown', () => {
@@ -327,7 +315,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
       if (!itemRect) {
         itemRectCache.set(key, domRect);
 
-        adjustPositions();
+        requestAnimationFrame(adjustPositions);
         return;
       }
 
@@ -337,7 +325,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
           y: itemRectCache.get(key)?.y || SIZE_CONFIG.cardFirstRowMargin,
         });
 
-        adjustPositions();
+        requestAnimationFrame(adjustPositions);
       }
     }
   };
