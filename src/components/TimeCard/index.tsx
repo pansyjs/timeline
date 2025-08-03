@@ -62,6 +62,7 @@ function TimeCardInternal<D extends DataItem = DataItem>(
         </div>
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, color, customRender, render],
   );
 

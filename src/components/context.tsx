@@ -1,5 +1,5 @@
 import React from 'react';
-import { defaultPrefixCls, DEFAULT_COLOR } from '../config';
+import { DEFAULT_COLOR, defaultPrefixCls } from '../config';
 import { getPrefixCls } from '../utils';
 
 interface ConfigConsumerProps {
@@ -15,4 +15,4 @@ const TimeLineContext = React.createContext<ConfigConsumerProps>({
   getPrefixCls,
 } as ConfigConsumerProps);
 
-export { TimeLineContext }
+export { TimeLineContext };

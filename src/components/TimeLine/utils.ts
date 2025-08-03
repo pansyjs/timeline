@@ -4,7 +4,6 @@ import type { VirtualItem } from '../../types';
  * 判断是否存在遮挡
  * @param a
  * @param b
- * @returns
  */
 export function isOverlappingX(a: VirtualItem, b: VirtualItem) {
   const aLeft = a.x;
@@ -19,7 +18,6 @@ export function isOverlappingX(a: VirtualItem, b: VirtualItem) {
  * 通过节点获取唯一标识
  * @param node
  * @param attributeKey
- * @returns
  */
 export function keyFromElement(node: HTMLDivElement, attributeKey = 'data-key') {
   return node.getAttribute(attributeKey) || '';
@@ -32,17 +30,18 @@ export function keyFromElement(node: HTMLDivElement, attributeKey = 'data-key') 
  * @returns 分组后的结果，每个子数组包含至少两个重叠元素
  */
 export function splitOverlappingItems(items: VirtualItem[]): VirtualItem[][] {
-  if (items.length < 2) return [];
+  if (items.length < 2)
+    return [];
 
   // 按x坐标升序排序，便于高效处理重叠关系
   const sortedItems = [...items].sort((a, b) => a.x - b.x);
 
   // 定义组的结构，包含元素列表、最小左边界和最大右边界
-  type Group = {
+  interface Group {
     items: VirtualItem[];
     minLeft: number;
     maxRight: number;
-  };
+  }
 
   const groups: Group[] = [];
 
@@ -81,12 +80,13 @@ export function splitOverlappingItems(items: VirtualItem[]): VirtualItem[][] {
           groups.splice(index, 1);
         }
       }
-    } else {
+    }
+    else {
       // 没有重叠组，创建新组
       groups.push({
         items: [item],
         minLeft: item.x,
-        maxRight: itemRight
+        maxRight: itemRight,
       });
     }
   }

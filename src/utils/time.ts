@@ -45,7 +45,6 @@ interface CalculateTimeRangeOptions {
 /**
  * 计算数据的时间范围
  * @param data
- * @returns
  */
 export function calculateTimeRange(data: DataItem[], options: CalculateTimeRangeOptions = {}) {
   const {

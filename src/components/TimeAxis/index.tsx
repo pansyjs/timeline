@@ -34,6 +34,7 @@ export function TimeAxis(props: TimeAxisProps) {
 
       return ticks;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [timeRange],
   );
 
@@ -61,6 +62,7 @@ export function TimeAxis(props: TimeAxisProps) {
         emitter.off('panmove', handlePanMove);
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
