@@ -71,7 +71,6 @@ function TimeCardInternal<D extends DataItem = DataItem>(
         style={{
           ...style,
           top: position,
-          zIndex: checked ? 50 : undefined
         }}
         ref={ref}
         {...rest}
@@ -85,7 +84,14 @@ function TimeCardInternal<D extends DataItem = DataItem>(
           }}
         />
 
-        {cardMemo}
+        <div
+          className={`${prefixCls}-container`}
+          style={{
+            zIndex: checked ? 50 : 10
+          }}
+        >
+          {cardMemo}
+        </div>
       </div>
     )
   }

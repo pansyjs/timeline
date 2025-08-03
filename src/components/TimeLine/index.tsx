@@ -387,7 +387,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
 
                 <TimeCard
                   style={{
-                    transform: `translateX(${position + 4}px)`,
+                    left: position + 4,
                   }}
                   position={positionY}
                   ref={measureElement}

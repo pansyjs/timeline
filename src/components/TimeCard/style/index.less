@@ -5,13 +5,19 @@
 .@{time-line-prefix-cls} {
   position: absolute;
   pointer-events: auto;
+  z-index: auto;
 
   &-line {
     position: absolute;
     left: 0;
     width: 1px;
     background-color: @color-line;
-    z-index: -1;
+    z-index: 1;
+  }
+
+  &-container {
+    position: relative;
+    z-index: 10;
   }
 
   &-cntent {
