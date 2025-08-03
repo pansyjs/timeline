@@ -1,6 +1,6 @@
 {
   "name": "@pansy/react-timeline",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "packageManager": "pnpm@10.13.1",
   "sideEffects": [
     "*.less"
