@@ -30,7 +30,7 @@ import {
   getStartTime,
 } from '../../utils';
 import { emitter, measureElement as measureElementUtil, getRect } from '../../utils';
-import { isOverlappingX, keyFromElement } from './utils';
+import { isOverlappingX, keyFromElement, splitOverlappingItems } from './utils';
 import './style/index.less';
 
 export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>) {
@@ -212,14 +212,21 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
       if (!itemRect) {
         itemRectCache.set(key, domRect);
 
-        adjustPositions();
+        if (itemRectCache.size === 8) {
+          adjustPositions();
+        }
+
+        // adjustPositions();
         return;
       }
 
-      if (!isEqual(omit(domRect, ['x']), omit(itemRect, ['x']))) {
-        itemRectCache.set(key, domRect);
+      if (!isEqual(omit(domRect, ['y']), omit(itemRect, ['y']))) {
+        itemRectCache.set(key, {
+          ...domRect,
+          y: itemRectCache.get(key)?.y || SIZE_CONFIG.cardFirstRowMargin,
+        });
 
-        adjustPositions();
+        // adjustPositions();
       }
     }
   }
@@ -250,62 +257,68 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     if (!content) return;
 
     const containerHeight = getRect(content).height;
+    const minY = SIZE_CONFIG.cardFirstRowMargin;
 
-    const virtualItems: VirtualItem[] = [];
-    itemRectCache.forEach((item) => {
-      virtualItems.push(item);
+    if (containerHeight <= minY) {
+      return;
+    }
+
+    // 内聚重叠
+    const splitItems = splitOverlappingItems(Array.from(itemRectCache.values()));
+
+    // 处理重叠
+    // items > 已排序，所有都是重叠的
+    splitItems.forEach((items) => {
+      const { cardFirstRowMargin, cardRowGap } = SIZE_CONFIG;
+
+      /** 当前行 y 坐标 */
+      let currentY = cardFirstRowMargin;
+      /** 布局方向，1: 向下；-1: 向上；*/
+      let direction = 1;
+
+      items.forEach((item) => {
+        if (direction === 1) {
+          const nextY = (currentY + item.height + cardRowGap);
+
+          // 检查是否到达底部
+          if (nextY <= containerHeight) {
+            itemRectCache.set(item.key, {
+              ...itemRectCache.get(item.key)!,
+              y: currentY,
+            })
+
+            currentY = nextY;
+          } else {
+            direction = -1;
+            currentY = containerHeight - cardFirstRowMargin - item.height;
+
+            itemRectCache.set(item.key, {
+              ...itemRectCache.get(item.key)!,
+              y: currentY,
+            })
+          }
+        } else {
+          const nextY = (currentY - item.height - cardRowGap);
+
+          if (nextY >= cardFirstRowMargin) {
+            currentY = nextY;
+            itemRectCache.set(item.key, {
+              ...itemRectCache.get(item.key)!,
+              y: currentY,
+            })
+          } else {
+            direction = 1;
+            currentY = cardFirstRowMargin;
+            itemRectCache.set(item.key, {
+              ...itemRectCache.get(item.key)!,
+              y: currentY,
+            })
+          }
+        }
+      })
     });
-    const sortedVirtualItems = virtualItems.sort((a, b) => {
-      return a.x - b.x;
-    });
 
-    // 跟踪每列的最大Y坐标（用于堆叠重叠的卡片）
-    const columnMaxY: number[] = [];
-
-    sortedVirtualItems.forEach((card, index) => {
-      const rectInfo = itemRectCache.get(card.key)!;
-
-      // 找到所有与当前卡片在X轴上重叠的卡片
-      const overlappingVirtualItems = sortedVirtualItems.filter((otherCard, i) => {
-        const otherRectInfo = itemRectCache.get(otherCard.key)!;
-        return i < index && isOverlappingX(rectInfo, otherRectInfo)
-      });
-
-      if (overlappingVirtualItems.length === 0) {
-        itemRectCache.set(card.key, {
-          ...itemRectCache.get(card.key)!,
-          y: SIZE_CONFIG.cardInitialGap,
-        });
-        columnMaxY.push(rectInfo.height + SIZE_CONFIG.cardInitialGap);
-      } else {
-        // 找到重叠卡片所在的列
-        const columnIndices = overlappingVirtualItems.map(oc => {
-          return sortedVirtualItems.findIndex(c => c.key === oc.key)
-        });
-
-        // 找到这些列中最底部的位置
-        const maxYInColumns = Math.max(...columnIndices.map(ci => columnMaxY[ci] || 0));
-
-        itemRectCache.set(card.key, {
-          ...itemRectCache.get(card.key)!,
-          y: maxYInColumns,
-        });
-
-        // 更新当前列的最大Y坐标
-        columnMaxY.push(maxYInColumns + card.height + SIZE_CONFIG.cardGap);
-      }
-
-      const info = itemRectCache.get(card.key)!;
-
-      // 确保卡片不会超出容器底部
-      if (info.y + card.height > containerHeight) {
-        itemRectCache.set(card.key, {
-          ...itemRectCache.get(card.key)!,
-          y: Math.max(0, containerHeight - card.height - SIZE_CONFIG.cardGap),
-        });
-      }
-    })
-
+    // 触发渲染
     rerender();
   }
 
