@@ -5,8 +5,10 @@ type Time = NonNullable<ConfigType>;
 type Key = number | string | bigint
 
 interface Rect {
-  width: number
-  height: number
+  /** 节点宽度 */
+  width: number;
+  /** 节点高度 */
+  height: number;
 }
 
 interface TimeRange {
@@ -41,6 +43,15 @@ interface DataItem {
    */
   time: [Time, Time] | Time;
   [key: string]: any;
+}
+
+interface VirtualItem extends Rect {
+  /** 唯一标识 */
+  key: Key;
+  /** 横向坐标 */
+  x: number;
+  /** 纵向坐标 */
+  y: number;
 }
 
 interface Tick {
@@ -129,4 +140,5 @@ export type {
   TimeRangeDayJS,
   Rect,
   Key,
+  VirtualItem,
 }

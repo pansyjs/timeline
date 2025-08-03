@@ -1,13 +1,27 @@
-import type { TimeLineProps, TimeAxisProps, DataItem, Key, Rect, TimeCardProps } from '../../types';
+import type {
+  TimeLineProps,
+  TimeAxisProps,
+  DataItem,
+  Key,
+  TimeCardProps,
+  VirtualItem,
+} from '../../types';
 import React from 'react';
+import dayjs from 'dayjs';
 import { clsx } from 'clsx';
-import { isEqual } from 'es-toolkit/predicate'
+import { isEqual, omit } from 'es-toolkit'
 import interact from 'interactjs';
 import { TimeCard } from '../TimeCard';
 import { TimeAxis } from '../TimeAxis';
 import { TimePoint } from '../TimePoint';
 import { TimeLineContext } from '../context';
-import { defaultPrefixCls, AXIS_CONFIG, POINT_SIZE, DEFAULT_COLOR } from '../../config';
+import {
+  defaultPrefixCls,
+  AXIS_CONFIG,
+  POINT_SIZE,
+  DEFAULT_COLOR,
+  SIZE_CONFIG,
+} from '../../config';
 import {
   getWheelType,
   calculateTimeRange,
@@ -15,7 +29,8 @@ import {
   calculatePositionFromTime,
   calculateWidthFormTimeRange,
 } from '../../utils';
-import { emitter, measureElement as measureElementUtil } from '../../utils';
+import { emitter, measureElement as measureElementUtil, getRect } from '../../utils';
+import { isOverlappingX, getStartTime, keyFromElement } from './utils';
 import './style/index.less';
 
 export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>) {
@@ -29,15 +44,17 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     onSelect,
   } = props;
 
-  const customPrefixCls =  props.prefixCls || defaultPrefixCls;
+  const customPrefixCls = props.prefixCls || defaultPrefixCls;
 
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const contentRef = React.useRef<HTMLDivElement>(null);
   const [elementsCache] = React.useState(
     () => new Map<Key, HTMLDivElement>(),
   )
   const [itemRectCache] = React.useState(
-    () => new Map<Key, Rect>(),
+    () => new Map<Key, VirtualItem>(),
   )
-  const rootRef = React.useRef<HTMLDivElement>(null);
+  const rerender = React.useReducer(() => ({}), {})[1]
   const [isDragging, setIsDragging] = React.useState(false);
   const [hoverItem, setHoverItem] = React.useState<D | null>(null);
   const [selectItem, setSelectItem] = React.useState<D | null>(null)
@@ -163,16 +180,6 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     }
   })();
 
-  const keyFromElement = (node: HTMLDivElement) => {
-    const indexStr = node.getAttribute('data-key');
-
-    if (!indexStr) {
-      return -1
-    }
-
-    return parseInt(indexStr, 10)
-  }
-
   const _measureElement = (
     node: HTMLDivElement,
     entry: ResizeObserverEntry | undefined,
@@ -192,10 +199,27 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
 
     if (node.isConnected) {
       const rect = measureElementUtil(node, entry);
+      const clientRect = node.getClientRects()[0]!;
       const itemRect = itemRectCache.get(key);
 
-      if (!isEqual(itemRect, rect)) {
-        itemRectCache.set(key, rect);
+      const domRect = {
+        ...rect,
+        key,
+        x: clientRect.x,
+        y: clientRect.y
+      }
+
+      if (!itemRect) {
+        itemRectCache.set(key, domRect);
+
+        adjustPositions();
+        return;
+      }
+
+      if (!isEqual(omit(domRect, ['x']), omit(itemRect, ['x']))) {
+        itemRectCache.set(key, domRect);
+
+        adjustPositions();
       }
     }
   }
@@ -203,13 +227,88 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
   const measureElement = React.useCallback(
     (node: HTMLDivElement) => {
       if (!node) {
-        return;
+        elementsCache.forEach((cached, key) => {
+          if (!cached.isConnected) {
+            observer.unobserve(cached)
+            elementsCache.delete(key)
+          }
+        })
+        return
       }
 
       _measureElement(node, undefined)
     },
     []
   )
+
+  /**
+   * 布局计算
+   * @returns
+   */
+  const adjustPositions = () => {
+    const content = contentRef.current;
+    if (!content) return;
+
+    const containerHeight = getRect(content).height;
+
+    const virtualItems: VirtualItem[] = [];
+    itemRectCache.forEach((item) => {
+      virtualItems.push(item);
+    });
+
+    const sortedVirtualItems = virtualItems.sort((a, b) => {
+      return dayjs(getStartTime(a.x)).isBefore(dayjs(getStartTime(b.x))) ? -1 : 1
+    });
+
+    // 跟踪每列的最大Y坐标（用于堆叠重叠的卡片）
+    const columnMaxY: number[] = [];
+
+    sortedVirtualItems.forEach((card, index) => {
+      const rectInfo = itemRectCache.get(card.key)!;
+
+      // 找到所有与当前卡片在X轴上重叠的卡片
+      const overlappingVirtualItems = sortedVirtualItems.filter((otherCard, i) => {
+        const otherRectInfo = itemRectCache.get(otherCard.key)!;
+        return i < index && isOverlappingX(rectInfo, otherRectInfo)
+      });
+
+      if (overlappingVirtualItems.length === 0) {
+        itemRectCache.set(card.key, {
+          ...itemRectCache.get(card.key)!,
+          y: SIZE_CONFIG.cardInitialGap,
+        });
+        columnMaxY.push(rectInfo.height + SIZE_CONFIG.cardInitialGap);
+      } else {
+        // 找到重叠卡片所在的列
+        const columnIndices = overlappingVirtualItems.map(oc => {
+          return sortedVirtualItems.findIndex(c => c.key === oc.key)
+        });
+
+        // 找到这些列中最底部的位置
+        const maxYInColumns = Math.max(...columnIndices.map(ci => columnMaxY[ci] || 0));
+
+        itemRectCache.set(card.key, {
+          ...itemRectCache.get(card.key)!,
+          y: maxYInColumns,
+        });
+
+        // 更新当前列的最大Y坐标
+        columnMaxY.push(maxYInColumns + card.height + SIZE_CONFIG.cardGap);
+      }
+
+      const info = itemRectCache.get(card.key)!;
+
+      // 确保卡片不会超出容器底部
+      if (info.y + card.height > containerHeight) {
+        itemRectCache.set(card.key, {
+          ...itemRectCache.get(card.key)!,
+          y: Math.max(0, containerHeight - card.height - SIZE_CONFIG.cardGap),
+        });
+      }
+    })
+
+    rerender();
+  }
 
   return (
     <div
@@ -229,9 +328,11 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
         }}
       >
         <TimeAxis timeRange={timeRange} />
-        <div className={`${prefixCls}-cointent`}>
+        <div className={`${prefixCls}-content`} ref={contentRef}>
           {timeRange && data.map((item, index) => {
             const { time, id } = item;
+
+            const positionY = itemRectCache.get(item.id)?.y || 20;
 
             const position = calculatePositionFromTime({
               targetTime: Array.isArray(time) ? time[0] : time,
@@ -276,7 +377,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                   style={{
                     transform: `translateX(${position + 4}px)`,
                   }}
-                  position={index % 2 ? 24 : 100}
+                  position={positionY}
                   ref={measureElement}
                   data-key={item.id}
                   hover={item.id === hoverItem?.id}

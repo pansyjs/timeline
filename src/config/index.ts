@@ -33,3 +33,11 @@ export const POINT_SIZE = 8;
 
 export const DEFAULT_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 export const DEFAULT_COLOR = '#2B6DE5';
+
+// 尺寸配置
+export const SIZE_CONFIG = {
+  /** 卡片纵向初始间距 */
+  cardInitialGap: 24,
+  /** 卡片纵向间距 */
+  cardGap: 16,
+}
