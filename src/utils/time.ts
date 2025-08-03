@@ -138,6 +138,8 @@ export function calculatePositionFromTime(opts: CalculatePositionFromTimeOptions
     potSize,
   } = opts;
 
+  console.log('test')
+
   const targetTimestamp = dayjs(targetTime).valueOf();
   const baseTimestamp = dayjs(baseTime).valueOf();
   const timeDiffMs = targetTimestamp - baseTimestamp;
