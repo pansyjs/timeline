@@ -57,6 +57,7 @@
     "@rslib/core": "^0.11.0",
     "@rspress/plugin-preview": "^1.45.0",
     "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/node": "^24.0.12",
     "@types/react": "^18",
     "@types/react-dom": "^18",
