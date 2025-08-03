@@ -1,10 +1,10 @@
-import React from 'react';
-import type { TimePointProps, Time } from '../../types';
+import type { Time, TimePointProps } from '../../types';
 import { clsx } from 'clsx';
 import dayjs from 'dayjs';
-import { TimeLineContext } from '../context';
+import React from 'react';
 import { DEFAULT_FORMAT } from '../../config';
 import { adjustColorOpacityMemoize } from '../../utils';
+import { TimeLineContext } from '../context';
 import './styles/index.less';
 
 export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
@@ -21,7 +21,7 @@ export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
         className={clsx(prefixCls, `${prefixCls}-range`, className)}
         style={{
           ...style,
-          backgroundColor: (hover || checked) ? adjustColorOpacityMemoize({ color }) : undefined
+          backgroundColor: (hover || checked) ? adjustColorOpacityMemoize({ color }) : undefined,
         }}
         {...rest}
       >
@@ -40,7 +40,7 @@ export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
           }}
         />
       </div>
-    )
+    );
   }
 
   return (
@@ -52,5 +52,5 @@ export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
       }}
       title={dayjs(time as Time).format(DEFAULT_FORMAT)}
     />
-  )
+  );
 }

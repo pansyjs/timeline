@@ -32,7 +32,7 @@ import { TimeLineContext } from '../context';
 import { TimeAxis } from '../TimeAxis';
 import { TimeCard } from '../TimeCard';
 import { TimePoint } from '../TimePoint';
-import { isOverlappingX, keyFromElement, splitOverlappingItems } from './utils';
+import { keyFromElement, splitOverlappingItems } from './utils';
 import './style/index.less';
 
 export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>) {
@@ -167,6 +167,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
       return (_ro = new window.ResizeObserver((entries) => {
         entries.forEach((entry) => {
           const run = () => {
+            // eslint-disable-next-line ts/no-use-before-define
             _measureElement(entry.target as HTMLDivElement, entry);
           };
 
@@ -186,78 +187,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     };
   })();
 
-  const _measureElement = (
-    node: HTMLDivElement,
-    entry: ResizeObserverEntry | undefined,
-  ) => {
-    const key = keyFromElement(node);
-
-    const prevNode = elementsCache.get(key);
-
-    if (prevNode !== node) {
-      if (prevNode) {
-        observer.unobserve(prevNode);
-      }
-
-      observer.observe(node);
-      elementsCache.set(key, node);
-    }
-
-    if (node.isConnected) {
-      const rect = measureElementUtil(node, entry);
-      const clientRect = node.getClientRects()[0]!;
-      const itemRect = itemRectCache.get(key);
-
-      const domRect = {
-        ...rect,
-        key,
-        x: clientRect.x,
-        y: SIZE_CONFIG.cardFirstRowMargin,
-      };
-
-      if (!itemRect) {
-        itemRectCache.set(key, domRect);
-
-        // if (itemRectCache.size === 6) {
-        //   adjustPositions();
-        // }
-
-        adjustPositions();
-        return;
-      }
-
-      if (!isEqual(omit(domRect, ['y']), omit(itemRect, ['y']))) {
-        itemRectCache.set(key, {
-          ...domRect,
-          y: itemRectCache.get(key)?.y || SIZE_CONFIG.cardFirstRowMargin,
-        });
-
-        // adjustPositions();
-      }
-    }
-  };
-
-  const measureElement = React.useCallback(
-    (node: HTMLDivElement) => {
-      if (!node) {
-        elementsCache.forEach((cached, key) => {
-          if (!cached.isConnected) {
-            observer.unobserve(cached);
-            elementsCache.delete(key);
-          }
-        });
-        return;
-      }
-
-      _measureElement(node, undefined);
-    },
-    [],
-  );
-
-  /**
-   * 布局计算
-   * @returns
-   */
+  /** 布局计算 */
   const adjustPositions = () => {
     const content = contentRef.current;
     if (!content)
@@ -331,6 +261,74 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     // 触发渲染
     rerender();
   };
+
+  const _measureElement = (
+    node: HTMLDivElement,
+    entry: ResizeObserverEntry | undefined,
+  ) => {
+    const key = keyFromElement(node);
+
+    const prevNode = elementsCache.get(key);
+
+    if (prevNode !== node) {
+      if (prevNode) {
+        observer.unobserve(prevNode);
+      }
+
+      observer.observe(node);
+      elementsCache.set(key, node);
+    }
+
+    if (node.isConnected) {
+      const rect = measureElementUtil(node, entry);
+      const clientRect = node.getClientRects()[0]!;
+      const itemRect = itemRectCache.get(key);
+
+      const domRect = {
+        ...rect,
+        key,
+        x: clientRect.x,
+        y: SIZE_CONFIG.cardFirstRowMargin,
+      };
+
+      if (!itemRect) {
+        itemRectCache.set(key, domRect);
+
+        // if (itemRectCache.size === 6) {
+        //   adjustPositions();
+        // }
+
+        adjustPositions();
+        return;
+      }
+
+      if (!isEqual(omit(domRect, ['y']), omit(itemRect, ['y']))) {
+        itemRectCache.set(key, {
+          ...domRect,
+          y: itemRectCache.get(key)?.y || SIZE_CONFIG.cardFirstRowMargin,
+        });
+
+        adjustPositions();
+      }
+    }
+  };
+
+  const measureElement = React.useCallback(
+    (node: HTMLDivElement) => {
+      if (!node) {
+        elementsCache.forEach((cached, key) => {
+          if (!cached.isConnected) {
+            observer.unobserve(cached);
+            elementsCache.delete(key);
+          }
+        });
+        return;
+      }
+
+      _measureElement(node, undefined);
+    },
+    [],
+  );
 
   return (
     <div

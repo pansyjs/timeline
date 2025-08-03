@@ -1,18 +1,18 @@
-import type { TimeAxisProps, Tick } from '../../types';
-import { useVirtualizer } from '@tanstack/react-virtual'
+import type { Tick, TimeAxisProps } from '../../types';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { clsx } from 'clsx';
-import React from 'react';
 import dayjs from 'dayjs';
-import { TimeLineContext } from '../context';
-import { GRANULARITIES, AXIS_CONFIG } from '../../config';
+import React from 'react';
+import { AXIS_CONFIG, GRANULARITIES } from '../../config';
 import { emitter } from '../../utils';
+import { TimeLineContext } from '../context';
 import './style/index.less';
 
 export function TimeAxis(props: TimeAxisProps) {
   const { timeRange, children } = props;
 
   /** 时间粒度（默认1分钟） */
-  const [granularity, setGranularity] = React.useState(0);
+  const [granularity] = React.useState(0);
   const { getPrefixCls, rootElement } = React.useContext(TimeLineContext);
   const prefixCls = getPrefixCls('timeline-axis');
 
@@ -24,7 +24,7 @@ export function TimeAxis(props: TimeAxisProps) {
         return ticks;
       }
 
-      const { step, scale } = GRANULARITIES[granularity]
+      const { step, scale } = GRANULARITIES[granularity];
 
       for (let time = timeRange.start; time.isBefore(timeRange.end); time = time.add(step, scale)) {
         ticks.push({
@@ -34,8 +34,8 @@ export function TimeAxis(props: TimeAxisProps) {
 
       return ticks;
     },
-    [timeRange]
-  )
+    [timeRange],
+  );
 
   const ticks = generateTicks();
 
@@ -50,19 +50,19 @@ export function TimeAxis(props: TimeAxisProps) {
   });
 
   const handlePanMove = (e: any) => {
-    ticksVirtualizer.scrollToOffset(ticksVirtualizer.scrollOffset + e.dx)
-  }
+    ticksVirtualizer.scrollToOffset(ticksVirtualizer.scrollOffset + e.dx);
+  };
 
   React.useEffect(
     () => {
       emitter.on('panmove', handlePanMove);
 
       return () => {
-        emitter.off('panmove', handlePanMove)
-      }
+        emitter.off('panmove', handlePanMove);
+      };
     },
-    []
-  )
+    [],
+  );
 
   return (
     <div
@@ -99,9 +99,9 @@ export function TimeAxis(props: TimeAxisProps) {
               </div>
             )}
           </div>
-        )
+        );
       })}
       {children}
     </div>
-  )
+  );
 }
