@@ -1,5 +1,15 @@
 {
   "compilerOptions": {
-
-  }
+    "target": "ES2020",
+    "jsx": "react",
+    "lib": ["DOM", "ES2020"],
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "strict": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
+  },
+  "include": ["src"]
 }

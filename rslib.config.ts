@@ -1,6 +1,6 @@
 import * as path from 'node:path';
+import { pluginReact } from '@rsbuild/plugin-react';
 import { defineConfig } from '@rslib/core';
-import { pluginReact } from '@rsbuild/plugin-react';;
 
 export default defineConfig({
   source: {
@@ -16,7 +16,7 @@ export default defineConfig({
   output: {
     target: 'web',
     copy: [
-      { from: '**/*.less', context: path.join(__dirname, 'src') }
+      { from: '**/*.less', context: path.join(__dirname, 'src') },
     ],
   },
   lib: [

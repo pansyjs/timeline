@@ -1,8 +1,8 @@
-import React from 'react';
 import type { ConfigType, Dayjs } from 'dayjs';
+import type React from 'react';
 
 type Time = NonNullable<ConfigType>;
-type Key = number | string | bigint
+type Key = number | string | bigint;
 
 interface Rect {
   /** 节点宽度 */
@@ -22,7 +22,7 @@ interface TimeRangeDayJS {
 }
 
 /** 时间轴视图类型 */
-type TimeAxisView  = 'month' | 'day' | 'hour' | 'minute' | 'second';
+type TimeAxisView = 'month' | 'day' | 'hour' | 'minute' | 'second';
 
 interface DataItem {
   /** 数据唯一标识 */
@@ -30,7 +30,7 @@ interface DataItem {
   /** 标题 */
   title: string;
   /** 颜色 */
-  color?: string,
+  color?: string;
   /**
    * 是否使用全局的自定义渲染
    * @default true
@@ -60,7 +60,7 @@ interface Tick {
 }
 
 interface BaseProps {
-   /** 额外的样式类 */
+  /** 额外的样式类 */
   className?: string;
   /** 额外的样式 */
   style?: React.CSSProperties;
@@ -128,17 +128,17 @@ interface TimeCardProps<D extends DataItem = DataItem> extends Omit<BaseProps, '
 }
 
 export type {
-  Time,
-  TimeAxisView,
   DataItem,
-  TimeLineProps,
-  TimeAxisProps,
-  TimePointProps,
-  TimeCardProps,
+  Key,
+  Rect,
   Tick,
+  Time,
+  TimeAxisProps,
+  TimeAxisView,
+  TimeCardProps,
+  TimeLineProps,
+  TimePointProps,
   TimeRange,
   TimeRangeDayJS,
-  Rect,
-  Key,
   VirtualItem,
-}
+};
