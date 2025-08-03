@@ -206,17 +206,17 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
         ...rect,
         key,
         x: clientRect.x,
-        y: clientRect.y
+        y: SIZE_CONFIG.cardFirstRowMargin
       }
 
       if (!itemRect) {
         itemRectCache.set(key, domRect);
 
-        if (itemRectCache.size === 8) {
-          adjustPositions();
-        }
+        // if (itemRectCache.size === 6) {
+        //   adjustPositions();
+        // }
 
-        // adjustPositions();
+        adjustPositions();
         return;
       }
 
@@ -265,6 +265,8 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
 
     // 内聚重叠
     const splitItems = splitOverlappingItems(Array.from(itemRectCache.values()));
+
+    console.log(splitItems)
 
     // 处理重叠
     // items > 已排序，所有都是重叠的
