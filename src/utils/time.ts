@@ -1,8 +1,9 @@
 import type { DataItem, Time, TimeRange, TimeRangeDayJS } from '../types';
 import dayjs from 'dayjs';
 
-const isTimeRange = (time: DataItem['time']): time is [Time, Time] =>
-  Array.isArray(time) && time.length === 2;
+function isTimeRange(time: DataItem['time']): time is [Time, Time] {
+  return Array.isArray(time) && time.length === 2;
+}
 
 /**
  * 处理时间范围为整小时
@@ -12,16 +13,16 @@ const isTimeRange = (time: DataItem['time']): time is [Time, Time] =>
 function processTimeRange(props: TimeRange): TimeRangeDayJS {
   const { start, end } = props;
 
-  const isEndExactHour =
-    dayjs(end).minute() === 0 &&
-    dayjs(end).second() === 0 &&
-    dayjs(end).millisecond() === 0;
+  const isEndExactHour
+    = dayjs(end).minute() === 0
+      && dayjs(end).second() === 0
+      && dayjs(end).millisecond() === 0;
 
   return {
     start: dayjs(start).startOf('hour'),
     end: isEndExactHour
       ? dayjs(end)
-      : dayjs(end).add(1, 'hour').startOf('hour')
+      : dayjs(end).add(1, 'hour').startOf('hour'),
   };
 }
 
@@ -51,20 +52,20 @@ export function calculateTimeRange(data: DataItem[], options: CalculateTimeRange
   const {
     padding = 30,
     minRange = 60 * 24,
-    defaultCenter = dayjs()
+    defaultCenter = dayjs(),
   } = options;
 
   const centerTime = dayjs(defaultCenter);
   const defaultTimeRange = {
     start: centerTime.subtract(minRange / 2, 'minute'),
     end: centerTime.add(minRange / 2, 'minute'),
-  }
+  };
 
   if (!data || data.length === 0) {
     return processTimeRange(defaultTimeRange);
   }
 
-  const allTimes = data.flatMap(item => {
+  const allTimes = data.flatMap((item) => {
     if (isTimeRange(item.time)) {
       return [dayjs(item.time[0]), dayjs(item.time[1])];
     }
@@ -77,7 +78,7 @@ export function calculateTimeRange(data: DataItem[], options: CalculateTimeRange
     return processTimeRange({
       start: centerTime.subtract(minRange / 2, 'minute'),
       end: centerTime.add(minRange / 2, 'minute'),
-    })
+    });
   }
 
   // 计算原始时间范围
@@ -96,13 +97,13 @@ export function calculateTimeRange(data: DataItem[], options: CalculateTimeRange
 
     return processTimeRange({
       start: trimmedStartTime.subtract(extendBy, 'minute'),
-      end: trimmedEndTime.add(extendBy, 'minute')
+      end: trimmedEndTime.add(extendBy, 'minute'),
     });
   }
 
   return processTimeRange({
     start: trimmedStartTime,
-    end: trimmedEndTime
+    end: trimmedEndTime,
   });
 }
 
@@ -113,7 +114,7 @@ interface CalculatePositionFromTimeOptions {
   baseTime: Time;
   /** 每个刻度代表的时间间隔（毫秒） */
   tickIntervalMs: number;
- /** 单个刻度的宽度（像素） */
+  /** 单个刻度的宽度（像素） */
   tickWidth: number;
   /** 刻度之间的间距（像素） */
   tickGap: number;
@@ -138,7 +139,7 @@ export function calculatePositionFromTime(opts: CalculatePositionFromTimeOptions
     potSize,
   } = opts;
 
-  console.log('test')
+  console.log('test123');
 
   const targetTimestamp = dayjs(targetTime).valueOf();
   const baseTimestamp = dayjs(baseTime).valueOf();
