@@ -1,7 +1,6 @@
 import type {
   DataItem,
   Key,
-  TimeAxisProps,
   TimeCardProps,
   TimeLineProps,
   VirtualItem,
@@ -62,7 +61,12 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
   const [isDragging, setIsDragging] = React.useState(false);
   const [hoverItem, setHoverItem] = React.useState<D | null>(null);
   const [selectItem, setSelectItem] = React.useState<D | null>(null);
-  const [timeRange, setTimeRange] = React.useState<TimeAxisProps['timeRange']>();
+
+  const timeRange = calculateTimeRange(data, {
+    padding: 30,
+    minRange: 60 * 24,
+    defaultCenter: new Date(),
+  });
 
   const getPrefixCls = React.useCallback(
     (suffixCls?: string) => {
@@ -126,19 +130,6 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
-  );
-
-  React.useEffect(
-    () => {
-      const timeRange = calculateTimeRange(data, {
-        padding: 30,
-        minRange: 60 * 24,
-        defaultCenter: new Date(),
-      });
-
-      setTimeRange(timeRange);
-    },
-    [data],
   );
 
   const handleHover = (item: D | null) => {
@@ -297,10 +288,6 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
       if (!itemRect) {
         itemRectCache.set(key, domRect);
 
-        // if (itemRectCache.size === 6) {
-        //   adjustPositions();
-        // }
-
         adjustPositions();
         return;
       }
@@ -333,6 +320,18 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     [],
   );
 
+  const contextValue = React.useMemo(
+    () => {
+      return {
+        prefixCls,
+        getPrefixCls,
+        defaultColor,
+        rootElement: rootRef.current!,
+      };
+    },
+    [prefixCls, getPrefixCls, defaultColor],
+  );
+
   return (
     <div
       className={clsx(prefixCls, className)}
@@ -342,14 +341,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
         ...style,
       }}
     >
-      <TimeLineContext.Provider
-        value={{
-          prefixCls,
-          getPrefixCls,
-          defaultColor,
-          rootElement: rootRef.current!,
-        }}
-      >
+      <TimeLineContext.Provider value={contextValue}>
         <TimeAxis timeRange={timeRange} />
         <div className={`${prefixCls}-content`} ref={contentRef}>
           {timeRange && data.map((item, index) => {
