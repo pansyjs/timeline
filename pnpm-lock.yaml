@@ -23,9 +23,6 @@ importers:
       interactjs:
         specifier: ^1.10.27
         version: 1.10.27
-      mitt:
-        specifier: ^3.0.1
-        version: 3.0.1
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^5.1.0
@@ -3650,9 +3647,6 @@ packages:
 
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
-
-  mitt@3.0.1:
-    resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
 
   mlly@1.7.4:
     resolution: {integrity: sha512-qmdSIPC4bDJXgZTCR7XosJiNKySV7O215tsPtDN9iEO/7q/76b/ijtgRu/+epFXSJhijtTCCGp3DWS549P3xKw==}
@@ -9464,8 +9458,6 @@ snapshots:
       brace-expansion: 2.0.2
 
   minimist@1.2.8: {}
-
-  mitt@3.0.1: {}
 
   mlly@1.7.4:
     dependencies:
