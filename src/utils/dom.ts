@@ -1,4 +1,4 @@
-import type { Rect } from '../types';
+import type { Rect } from '@/types';
 
 /**
  * 获取元素的宽高信息

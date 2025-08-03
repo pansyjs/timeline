@@ -5,7 +5,7 @@ import type {
   TimeCardProps,
   TimeLineProps,
   VirtualItem,
-} from '../../types';
+} from '@/types';
 import { clsx } from 'clsx';
 import { isEqual, omit } from 'es-toolkit';
 import interact from 'interactjs';
@@ -16,7 +16,7 @@ import {
   defaultPrefixCls,
   POINT_SIZE,
   SIZE_CONFIG,
-} from '../../config';
+} from '@/config';
 import {
   calculatePositionFromTime,
   calculateTimeRange,
@@ -27,7 +27,7 @@ import {
   getStartTime,
   getWheelType,
   measureElement as measureElementUtil,
-} from '../../utils';
+} from '@/utils';
 import { TimeLineContext } from '../context';
 import { TimeAxis } from '../TimeAxis';
 import { TimeCard } from '../TimeCard';
@@ -35,11 +35,13 @@ import { TimePoint } from '../TimePoint';
 import { keyFromElement, splitOverlappingItems } from './utils';
 import './style/index.less';
 
+const defaultValue: TimeLineProps['data'] = [];
+
 export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>) {
   const {
     className,
     style,
-    data = [],
+    data = defaultValue,
     moveable = true,
     defaultColor = DEFAULT_COLOR,
     renderCard,
@@ -122,6 +124,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
         root.removeEventListener(wheelType as 'wheel', onMouseWheel, false);
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
@@ -388,9 +391,9 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                   data={item}
                   hover={item.id === hoverItem?.id}
                   checked={item.id === selectItem?.id}
-                  onMouseEnter={() => { handleHover(item); }}
+                  onMouseEnter={() => { handleHover(item as D); }}
                   onMouseLeave={() => { handleHover(null); }}
-                  onClick={() => { handleClick(item); }}
+                  onClick={() => { handleClick(item as D); }}
                 />
 
                 <TimeCard
@@ -403,9 +406,9 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                   hover={item.id === hoverItem?.id}
                   checked={item.id === selectItem?.id}
                   data={item}
-                  onMouseEnter={() => { handleHover(item); }}
+                  onMouseEnter={() => { handleHover(item as D); }}
                   onMouseLeave={() => { handleHover(null); }}
-                  onClick={() => { handleClick(item); }}
+                  onClick={() => { handleClick(item as D); }}
                   render={renderCard as TimeCardProps['render']}
                 />
               </React.Fragment>

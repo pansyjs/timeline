@@ -1,8 +1,8 @@
-import type { DataItem, TimeCardProps } from '../../types';
+import type { DataItem, TimeCardProps } from '@/types';
 import { clsx } from 'clsx';
 import dayjs from 'dayjs';
 import React from 'react';
-import { DEFAULT_FORMAT } from '../../config';
+import { DEFAULT_FORMAT } from '@/config';
 import { TimeLineContext } from '../context';
 import './style/index.less';
 

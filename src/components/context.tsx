@@ -1,6 +1,6 @@
 import React from 'react';
-import { DEFAULT_COLOR, defaultPrefixCls } from '../config';
-import { getPrefixCls } from '../utils';
+import { DEFAULT_COLOR, defaultPrefixCls } from '@/config';
+import { getPrefixCls } from '@/utils';
 
 interface ConfigConsumerProps {
   prefixCls: string;

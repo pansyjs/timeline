@@ -1,4 +1,4 @@
-import type { DataItem, Time, TimeRange, TimeRangeDayJS } from '../types';
+import type { DataItem, Time, TimeRange, TimeRangeDayJS } from '@/types';
 import dayjs from 'dayjs';
 
 function isTimeRange(time: DataItem['time']): time is [Time, Time] {

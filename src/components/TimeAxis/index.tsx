@@ -1,10 +1,10 @@
-import type { Tick, TimeAxisProps } from '../../types';
+import type { Tick, TimeAxisProps } from '@/types';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { clsx } from 'clsx';
 import dayjs from 'dayjs';
 import React from 'react';
-import { AXIS_CONFIG, GRANULARITIES } from '../../config';
-import { emitter } from '../../utils';
+import { AXIS_CONFIG, GRANULARITIES } from '@/config';
+import { emitter } from '@/utils';
 import { TimeLineContext } from '../context';
 import './style/index.less';
 

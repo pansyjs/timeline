@@ -1,9 +1,9 @@
-import type { Time, TimePointProps } from '../../types';
+import type { Time, TimePointProps } from '@/types';
 import { clsx } from 'clsx';
 import dayjs from 'dayjs';
 import React from 'react';
-import { DEFAULT_FORMAT } from '../../config';
-import { adjustColorOpacityMemoize } from '../../utils';
+import { DEFAULT_FORMAT } from '@/config';
+import { adjustColorOpacityMemoize } from '@/utils';
 import { TimeLineContext } from '../context';
 import './styles/index.less';
 

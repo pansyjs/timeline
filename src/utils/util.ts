@@ -1,4 +1,4 @@
-import { defaultPrefixCls } from '../config';
+import { defaultPrefixCls } from '@/config';
 
 export function getPrefixCls(suffixCls?: string, prefixCls = defaultPrefixCls) {
   return suffixCls ? `${prefixCls}-${suffixCls}` : prefixCls;
