@@ -39,6 +39,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     style,
     data = defaultValue,
     moveable = true,
+    zoomable = true,
     defaultColor = DEFAULT_COLOR,
     renderCard,
     onSelect,
@@ -158,6 +159,9 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
 
   function onMouseWheel(e: WheelEvent) {
     e.preventDefault();
+    if (!zoomable) {
+      return;
+    }
     onZoom(e.deltaY);
   }
 
