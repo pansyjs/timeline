@@ -11,11 +11,9 @@ import dayjs from 'dayjs';
 import interact from 'interactjs';
 import React from 'react';
 import {
-  AXIS_CONFIG,
   DEFAULT_COLOR,
   defaultPrefixCls,
   GRANULARITIES,
-  POINT_SIZE,
   SIZE_CONFIG,
 } from '@/config';
 import { useMeasureElements } from '@/hooks';
@@ -168,7 +166,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     });
   };
 
-  const measureElement = useMeasureElements<HTMLDivElement, HTMLDivElement>({
+  const measureElements = useMeasureElements<HTMLDivElement, HTMLDivElement>({
     getContainerElement: () => contentRef.current,
     onChange: (ins) => {
       requestAnimationFrame(() => {
@@ -183,14 +181,14 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     getScrollElement: () => rootRef.current,
     estimateSize: () => 1,
     gap: 8,
-    paddingStart: AXIS_CONFIG.paddingStart,
-    paddingEnd: AXIS_CONFIG.paddingEnd,
+    paddingStart: SIZE_CONFIG.axisPaddingStart,
+    paddingEnd: SIZE_CONFIG.axisPaddingEnd,
   });
 
   function onMouseWheel(e: WheelEvent) {
     e.preventDefault();
 
-    // console.log('deltaX', event.deltaX, 'deltaY', event.deltaY);
+    // console.log('deltaX', e.deltaX, 'deltaY', e.deltaY);
   }
 
   React.useEffect(
@@ -306,16 +304,16 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
           {timeRange && data.map((item, index) => {
             const { time, id } = item;
 
-            const positionY = measureElement.itemRectCache.get(item.id)?.y || 20;
+            const positionY = measureElements.itemRectCache.get(item.id)?.y || 20;
 
             const position = calculatePositionFromTime({
               targetTime: getStartTime(time),
               baseTime: timeRange.start,
               tickIntervalMs: 1000 * 60,
-              tickWidth: AXIS_CONFIG.width,
+              tickWidth: SIZE_CONFIG.axisTickWidth,
               tickGap: 8,
-              paddingStart: AXIS_CONFIG.paddingStart,
-              potSize: POINT_SIZE,
+              paddingStart: SIZE_CONFIG.axisPaddingEnd,
+              potSize: SIZE_CONFIG.pointSize,
             });
 
             let width: undefined | number;
@@ -327,7 +325,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                   end: time[1],
                 },
                 tickIntervalMs: 1000 * 60,
-                tickWidth: AXIS_CONFIG.width,
+                tickWidth: SIZE_CONFIG.axisTickWidth,
                 tickGap: 8,
               });
             }
@@ -352,7 +350,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                     left: position + 4,
                   }}
                   position={positionY}
-                  ref={measureElement.measureElement}
+                  ref={measureElements.measureElement}
                   data-key={item.id}
                   hover={item.id === hoverItem?.id}
                   checked={item.id === selectItem?.id}

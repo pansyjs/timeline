@@ -22,22 +22,31 @@ export const GRANULARITIES: GranularityItem[] = [
   { scale: 'day', step: 1, labelStep: 1, majorLabelFormat: 'YYYY-MM', minorLabelFormat: 'DD' },
 ];
 
-export const AXIS_CONFIG = {
-  paddingStart: 48,
-  paddingEnd: 48,
-  /** 刻度的宽度 */
-  width: 1,
-}
-
-export const POINT_SIZE = 8;
-
 export const DEFAULT_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 export const DEFAULT_COLOR = '#2B6DE5';
 
 // 尺寸配置
 export const SIZE_CONFIG = {
+  // 卡片相关
   /** 卡片纵向初始间距 */
   cardFirstRowMargin: 24,
   /** 卡片纵向行间距 */
   cardRowGap: 16,
-}
+
+  // 时间轴相关
+  axisPaddingStart: 48,
+  axisPaddingEnd: 48,
+  /** 刻度的宽度 */
+  axisTickWidth: 1,
+
+  // 点和范围相关
+  pointSize: 8,
+};
+
+/** Zoom 配置，毫秒 */
+export const DEFAULT_ZOOM_CONFIG = {
+  // 一分钟
+  min: 1000 * 60,
+  // 一天
+  max: 1000 * 60 * 60 * 24,
+};
