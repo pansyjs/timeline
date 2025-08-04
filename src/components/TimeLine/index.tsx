@@ -1,7 +1,6 @@
 import type { MeasureElements } from '@/hooks';
 import type {
   DataItem,
-  Tick,
   TimeCardProps,
   TimeLineProps,
 } from '@/types';
@@ -12,14 +11,14 @@ import interact from 'interactjs';
 import React from 'react';
 import {
   DEFAULT_COLOR,
+  DEFAULT_FORMAT,
   defaultPrefixCls,
-  GRANULARITIES,
+  SCALE_MILLISECONDS,
   SIZE_CONFIG,
 } from '@/config';
-import { useMeasureElements } from '@/hooks';
+import { useMeasureElements, useTicks } from '@/hooks';
 import {
   calculatePositionFromTime,
-  calculateTimeRange,
   calculateWidthFormTimeRange,
   getPrefixCls as getPrefixClsUtil,
   getRect,
@@ -48,12 +47,15 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
   const customPrefixCls = props.prefixCls || defaultPrefixCls;
 
   const rootRef = React.useRef<HTMLDivElement>(null);
+  const axisRef = React.useRef<HTMLDivElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const [hoverItem, setHoverItem] = React.useState<D | null>(null);
   const [selectItem, setSelectItem] = React.useState<D | null>(null);
-  /** 时间粒度（默认1分钟） */
-  const [granularity] = React.useState(0);
+  const { onZoom, ticks, timeRange, granularity } = useTicks({
+    data,
+    getContainerElement: () => rootRef.current!,
+  });
 
   const getPrefixCls = React.useCallback(
     (suffixCls?: string) => {
@@ -61,38 +63,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     },
     [customPrefixCls],
   );
-
   const prefixCls = getPrefixCls('timeline');
-  const timeRange = calculateTimeRange(data, {
-    padding: 30,
-    minRange: 60 * 24,
-    defaultCenter: new Date(),
-  });
-
-  const generateTicks = React.useCallback(
-    () => {
-      const ticks: Tick[] = [];
-
-      if (!timeRange) {
-        return ticks;
-      }
-
-      const { step, scale } = GRANULARITIES[granularity];
-
-      for (let time = timeRange.start; time.isBefore(timeRange.end); time = time.add(step, scale)) {
-        ticks.push({
-          time,
-        });
-      }
-
-      return ticks;
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timeRange],
-  );
-
-  const ticks = generateTicks();
-
   /** 布局计算 */
   const adjustPositions = (ins: MeasureElements<HTMLDivElement, HTMLDivElement>) => {
     const itemRectCache = ins.itemRectCache;
@@ -180,15 +151,14 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     count: ticks.length,
     getScrollElement: () => rootRef.current,
     estimateSize: () => 1,
-    gap: 8,
+    gap: granularity.tickGap,
     paddingStart: SIZE_CONFIG.axisPaddingStart,
     paddingEnd: SIZE_CONFIG.axisPaddingEnd,
   });
 
   function onMouseWheel(e: WheelEvent) {
     e.preventDefault();
-
-    // console.log('deltaX', e.deltaX, 'deltaY', e.deltaY);
+    onZoom(e.deltaY);
   }
 
   React.useEffect(
@@ -217,13 +187,26 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
           setIsDragging(false);
         });
 
-      const wheelType = getWheelType();
-
-      root.addEventListener(wheelType as 'wheel', onMouseWheel, false);
-
       return () => {
         interact(root).unset();
-        root.removeEventListener(wheelType as 'wheel', onMouseWheel, false);
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  React.useEffect(
+    () => {
+      const axis = axisRef.current;
+      if (!axis)
+        return;
+
+      const wheelType = getWheelType();
+
+      axis.addEventListener(wheelType as 'wheel', onMouseWheel, false);
+
+      return () => {
+        axis.removeEventListener(wheelType as 'wheel', onMouseWheel, false);
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -264,6 +247,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
         {/* 时间轴 */}
         <div
           className={`${prefixCls}-axis`}
+          ref={axisRef}
           style={{
             width: `${ticksVirtualizer.getTotalSize()}px`,
           }}
@@ -271,7 +255,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
           {ticksVirtualizer.getVirtualItems().map((virtualColumn) => {
             const { index, key } = virtualColumn;
             const { time } = ticks[index];
-            const { labelStep, majorLabelFormat, minorLabelFormat } = GRANULARITIES[granularity];
+            const { labelStep, majorLabelFormat, minorLabelFormat } = granularity;
 
             const majorLabel = dayjs(time).format(majorLabelFormat);
             const minorLabel = dayjs(time).format(minorLabelFormat);
@@ -285,6 +269,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                 })}
                 key={key}
                 data-index={index}
+                data-time={time.format(DEFAULT_FORMAT)}
                 ref={ticksVirtualizer.measureElement}
                 style={{
                   transform: `translateX(${virtualColumn.start}px)`,
@@ -303,17 +288,17 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
         <div className={`${prefixCls}-content`} ref={contentRef}>
           {timeRange && data.map((item, index) => {
             const { time, id } = item;
-
             const positionY = measureElements.itemRectCache.get(item.id)?.y || 20;
+            const tickIntervalMs = granularity.step * SCALE_MILLISECONDS[granularity.scale];
 
             const position = calculatePositionFromTime({
               targetTime: getStartTime(time),
               baseTime: timeRange.start,
-              tickIntervalMs: 1000 * 60,
+              tickIntervalMs,
               tickWidth: SIZE_CONFIG.axisTickWidth,
-              tickGap: 8,
+              tickGap: granularity.tickGap,
               paddingStart: SIZE_CONFIG.axisPaddingEnd,
-              potSize: SIZE_CONFIG.pointSize,
+              pointSize: SIZE_CONFIG.pointSize,
             });
 
             let width: undefined | number;
@@ -324,9 +309,9 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                   start: time[0],
                   end: time[1],
                 },
-                tickIntervalMs: 1000 * 60,
+                tickIntervalMs,
                 tickWidth: SIZE_CONFIG.axisTickWidth,
-                tickGap: 8,
+                tickGap: granularity.tickGap,
               });
             }
 

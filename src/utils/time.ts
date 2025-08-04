@@ -119,7 +119,7 @@ interface CalculatePositionFromTimeOptions {
   /** 事件刻度左侧偏移 */
   paddingStart: number;
   /** 点的大小 */
-  potSize: number;
+  pointSize: number;
 }
 
 /**
@@ -134,7 +134,7 @@ export function calculatePositionFromTime(opts: CalculatePositionFromTimeOptions
     tickWidth,
     tickGap,
     paddingStart,
-    potSize,
+    pointSize,
   } = opts;
 
   const targetTimestamp = dayjs(targetTime).valueOf();
@@ -143,7 +143,7 @@ export function calculatePositionFromTime(opts: CalculatePositionFromTimeOptions
 
   const ticksCount = timeDiffMs / tickIntervalMs;
 
-  return ticksCount * (tickWidth + tickGap) + paddingStart - potSize / 2;
+  return ticksCount * (tickWidth + tickGap) + paddingStart - pointSize / 2;
 }
 
 interface CalculateWidthFormTimeRangeOptions {

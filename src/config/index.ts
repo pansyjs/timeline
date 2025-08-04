@@ -1,25 +1,32 @@
-import type { ManipulateType } from 'dayjs';
-
 export const defaultPrefixCls = 'pansy';
 
+type Scale = 'minute' | 'hour' | 'day';
+
 interface GranularityItem {
-  scale: ManipulateType;
+  scale: Scale;
   step: number;
   labelStep: number;
+  tickGap: number;
   majorLabelFormat: string;
   minorLabelFormat: string;
 }
 
-// 定义时间粒度选项（毫秒数）
+export const SCALE_MILLISECONDS: Record<Scale, number> = {
+  day: 1000 * 60 * 60 * 24,
+  hour: 1000 * 60 * 60,
+  minute: 100 * 60,
+};
+
+// 定义时间粒度选项
 export const GRANULARITIES: GranularityItem[] = [
-  { scale: 'minute', step: 1, labelStep: 10, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm:ss' },
-  { scale: 'minute', step: 5, labelStep: 10, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm:ss' },
-  { scale: 'minute', step: 10, labelStep: 10, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm:ss' },
-  { scale: 'minute', step: 30, labelStep: 10, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm:ss' },
-  { scale: 'hour', step: 1, labelStep: 5, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm' },
-  { scale: 'hour', step: 6, labelStep: 5, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm' },
-  { scale: 'hour', step: 12, labelStep: 5, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm' },
-  { scale: 'day', step: 1, labelStep: 1, majorLabelFormat: 'YYYY-MM', minorLabelFormat: 'DD' },
+  { scale: 'minute', step: 1, labelStep: 10, tickGap: 8, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm:ss' },
+  { scale: 'minute', step: 5, labelStep: 10, tickGap: 8, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm:ss' },
+  { scale: 'minute', step: 10, labelStep: 10, tickGap: 8, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm:ss' },
+  { scale: 'minute', step: 30, labelStep: 10, tickGap: 8, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm:ss' },
+  { scale: 'hour', step: 1, labelStep: 5, tickGap: 8, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm' },
+  { scale: 'hour', step: 6, labelStep: 5, tickGap: 8, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm' },
+  { scale: 'hour', step: 12, labelStep: 5, tickGap: 8, majorLabelFormat: 'YYYY-MM-DD', minorLabelFormat: 'HH:mm' },
+  { scale: 'day', step: 1, labelStep: 2, tickGap: 16, majorLabelFormat: 'YYYY-MM', minorLabelFormat: 'DD' },
 ];
 
 export const DEFAULT_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -45,8 +52,8 @@ export const SIZE_CONFIG = {
 
 /** Zoom 配置，毫秒 */
 export const DEFAULT_ZOOM_CONFIG = {
-  // 一分钟
+  /** 一分钟 */
   min: 1000 * 60,
-  // 一天
+  /** 一天 */
   max: 1000 * 60 * 60 * 24,
 };
