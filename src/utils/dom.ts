@@ -5,8 +5,10 @@ import type { Rect } from '@/types';
  * @param element
  */
 export function getRect(element: HTMLElement): Rect {
-  const { offsetWidth, offsetHeight } = element;
-  return { width: offsetWidth, height: offsetHeight };
+  return {
+    width: element.offsetWidth,
+    height: element.offsetHeight,
+  };
 }
 
 /**
@@ -61,21 +63,4 @@ export function observeElementRect<T extends Element>(element: T, cb: (rect: Rec
   return () => {
     observer.unobserve(element);
   };
-}
-
-export function measureElement<TItemElement extends Element>(element: TItemElement, entry: ResizeObserverEntry | undefined): Rect {
-  const handler = (rect: Rect) => {
-    const { width, height } = rect;
-    return { width: Math.round(width), height: Math.round(height) };
-  };
-
-  if (entry?.borderBoxSize) {
-    const box = entry.borderBoxSize[0];
-
-    if (box) {
-      return handler({ width: box.inlineSize, height: box.blockSize });
-    }
-  }
-
-  return handler(getRect(element as unknown as HTMLElement));
 }

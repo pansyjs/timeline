@@ -1,15 +1,13 @@
+import type { MeasureElement } from '@/hooks';
 import type {
   DataItem,
-  Key,
   Tick,
   TimeCardProps,
   TimeLineProps,
-  VirtualItem,
 } from '@/types';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { clsx } from 'clsx';
 import dayjs from 'dayjs';
-import { isEqual, omit } from 'es-toolkit';
 import interact from 'interactjs';
 import React from 'react';
 import {
@@ -20,6 +18,7 @@ import {
   POINT_SIZE,
   SIZE_CONFIG,
 } from '@/config';
+import { useMeasureElement } from '@/hooks';
 import {
   calculatePositionFromTime,
   calculateTimeRange,
@@ -28,12 +27,11 @@ import {
   getRect,
   getStartTime,
   getWheelType,
-  measureElement as measureElementUtil,
 } from '@/utils';
 import { TimeLineContext } from '../context';
 import { TimeCard } from '../TimeCard';
 import { TimePoint } from '../TimePoint';
-import { keyFromElement, splitOverlappingItems } from './utils';
+import { splitOverlappingItems } from './utils';
 import './style/index.less';
 
 const defaultValue: TimeLineProps['data'] = [];
@@ -53,13 +51,6 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
 
   const rootRef = React.useRef<HTMLDivElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
-  const [elementsCache] = React.useState(
-    () => new Map<Key, HTMLDivElement>(),
-  );
-  const [itemRectCache] = React.useState(
-    () => new Map<Key, VirtualItem>(),
-  );
-  const rerender = React.useReducer(() => ({}), {})[1];
   const [isDragging, setIsDragging] = React.useState(false);
   const [hoverItem, setHoverItem] = React.useState<D | null>(null);
   const [selectItem, setSelectItem] = React.useState<D | null>(null);
@@ -103,6 +94,88 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
   );
 
   const ticks = generateTicks();
+
+  /** 布局计算 */
+  const adjustPositions = (ins: MeasureElement<HTMLDivElement, HTMLDivElement>) => {
+    const itemRectCache = ins.itemRectCache;
+    const content = contentRef.current;
+    if (!content)
+      return;
+
+    const containerHeight = getRect(content).height;
+    const minY = SIZE_CONFIG.cardFirstRowMargin;
+
+    if (containerHeight <= minY) {
+      return;
+    }
+
+    // 内聚重叠
+    const splitItems = splitOverlappingItems(Array.from(itemRectCache.values()));
+
+    // 处理重叠
+    // items > 已排序，所有都是重叠的
+    splitItems.forEach((items) => {
+      const { cardFirstRowMargin, cardRowGap } = SIZE_CONFIG;
+
+      /** 当前行 y 坐标 */
+      let currentY = cardFirstRowMargin;
+      /** 布局方向，1: 向下；-1: 向上； */
+      let direction = 1;
+
+      items.forEach((item) => {
+        if (direction === 1) {
+          const nextY = (currentY + item.height + cardRowGap);
+
+          // 检查是否到达底部
+          if (nextY <= containerHeight) {
+            itemRectCache.set(item.key, {
+              ...itemRectCache.get(item.key)!,
+              y: currentY,
+            });
+
+            currentY = nextY;
+          }
+          else {
+            direction = -1;
+            currentY = containerHeight - cardFirstRowMargin - item.height;
+
+            itemRectCache.set(item.key, {
+              ...itemRectCache.get(item.key)!,
+              y: currentY,
+            });
+          }
+        }
+        else {
+          const nextY = (currentY - item.height - cardRowGap);
+
+          if (nextY >= cardFirstRowMargin) {
+            currentY = nextY;
+            itemRectCache.set(item.key, {
+              ...itemRectCache.get(item.key)!,
+              y: currentY,
+            });
+          }
+          else {
+            direction = 1;
+            currentY = cardFirstRowMargin;
+            itemRectCache.set(item.key, {
+              ...itemRectCache.get(item.key)!,
+              y: currentY,
+            });
+          }
+        }
+      });
+    });
+  };
+
+  const measureElement = useMeasureElement<HTMLDivElement, HTMLDivElement>({
+    getContainerElement: () => rootRef.current,
+    onChange: (ins) => {
+      requestAnimationFrame(() => {
+        adjustPositions(ins);
+      });
+    },
+  });
 
   const ticksVirtualizer = useVirtualizer({
     horizontal: true,
@@ -173,181 +246,6 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     onSelect?.(item);
   };
 
-  const observer = (() => {
-    let _ro: ResizeObserver | null = null;
-
-    const get = () => {
-      if (_ro) {
-        return _ro;
-      }
-
-      if (!window.ResizeObserver) {
-        return null;
-      }
-
-      return (_ro = new window.ResizeObserver((entries) => {
-        entries.forEach((entry) => {
-          const run = () => {
-            // eslint-disable-next-line ts/no-use-before-define
-            _measureElement(entry.target as HTMLDivElement, entry);
-          };
-
-          requestAnimationFrame(run);
-        });
-      }));
-    };
-
-    return {
-      disconnect: () => {
-        get()?.disconnect();
-        _ro = null;
-      },
-      observe: (target: Element) =>
-        get()?.observe(target, { box: 'border-box' }),
-      unobserve: (target: Element) => get()?.unobserve(target),
-    };
-  })();
-
-  /** 布局计算 */
-  const adjustPositions = () => {
-    const content = contentRef.current;
-    if (!content)
-      return;
-
-    const containerHeight = getRect(content).height;
-    const minY = SIZE_CONFIG.cardFirstRowMargin;
-
-    if (containerHeight <= minY) {
-      return;
-    }
-
-    // 内聚重叠
-    const splitItems = splitOverlappingItems(Array.from(itemRectCache.values()));
-
-    // 处理重叠
-    // items > 已排序，所有都是重叠的
-    splitItems.forEach((items) => {
-      const { cardFirstRowMargin, cardRowGap } = SIZE_CONFIG;
-
-      /** 当前行 y 坐标 */
-      let currentY = cardFirstRowMargin;
-      /** 布局方向，1: 向下；-1: 向上； */
-      let direction = 1;
-
-      items.forEach((item) => {
-        if (direction === 1) {
-          const nextY = (currentY + item.height + cardRowGap);
-
-          // 检查是否到达底部
-          if (nextY <= containerHeight) {
-            itemRectCache.set(item.key, {
-              ...itemRectCache.get(item.key)!,
-              y: currentY,
-            });
-
-            currentY = nextY;
-          }
-          else {
-            direction = -1;
-            currentY = containerHeight - cardFirstRowMargin - item.height;
-
-            itemRectCache.set(item.key, {
-              ...itemRectCache.get(item.key)!,
-              y: currentY,
-            });
-          }
-        }
-        else {
-          const nextY = (currentY - item.height - cardRowGap);
-
-          if (nextY >= cardFirstRowMargin) {
-            currentY = nextY;
-            itemRectCache.set(item.key, {
-              ...itemRectCache.get(item.key)!,
-              y: currentY,
-            });
-          }
-          else {
-            direction = 1;
-            currentY = cardFirstRowMargin;
-            itemRectCache.set(item.key, {
-              ...itemRectCache.get(item.key)!,
-              y: currentY,
-            });
-          }
-        }
-      });
-    });
-
-    // 触发渲染
-    rerender();
-  };
-
-  const _measureElement = (
-    node: HTMLDivElement,
-    entry: ResizeObserverEntry | undefined,
-  ) => {
-    const key = keyFromElement(node);
-
-    const prevNode = elementsCache.get(key);
-
-    if (prevNode !== node) {
-      if (prevNode) {
-        observer.unobserve(prevNode);
-      }
-
-      observer.observe(node);
-      elementsCache.set(key, node);
-    }
-
-    if (node.isConnected) {
-      const rect = measureElementUtil(node, entry);
-      const clientRect = node.getClientRects()[0]!;
-      const itemRect = itemRectCache.get(key);
-
-      const domRect = {
-        ...rect,
-        key,
-        x: clientRect.x,
-        y: SIZE_CONFIG.cardFirstRowMargin,
-      };
-
-      if (!itemRect) {
-        itemRectCache.set(key, domRect);
-
-        requestAnimationFrame(adjustPositions);
-        return;
-      }
-
-      if (!isEqual(omit(domRect, ['y']), omit(itemRect, ['y']))) {
-        itemRectCache.set(key, {
-          ...domRect,
-          y: itemRectCache.get(key)?.y || SIZE_CONFIG.cardFirstRowMargin,
-        });
-
-        requestAnimationFrame(adjustPositions);
-      }
-    }
-  };
-
-  const measureElement = React.useCallback(
-    (node: HTMLDivElement) => {
-      if (!node) {
-        elementsCache.forEach((cached, key) => {
-          if (!cached.isConnected) {
-            observer.unobserve(cached);
-            elementsCache.delete(key);
-          }
-        });
-        return;
-      }
-
-      _measureElement(node, undefined);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
-
   const contextValue = React.useMemo(() => {
     return {
       prefixCls,
@@ -406,7 +304,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
           {timeRange && data.map((item, index) => {
             const { time, id } = item;
 
-            const positionY = itemRectCache.get(item.id)?.y || 20;
+            const positionY = measureElement.itemRectCache.get(item.id)?.y || 20;
 
             const position = calculatePositionFromTime({
               targetTime: getStartTime(time),
@@ -452,7 +350,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
                     left: position + 4,
                   }}
                   position={positionY}
-                  ref={measureElement}
+                  ref={measureElement.measureElement}
                   data-key={item.id}
                   hover={item.id === hoverItem?.id}
                   checked={item.id === selectItem?.id}
