@@ -29,6 +29,7 @@ export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
         className={clsx(prefixCls, `${prefixCls}-range`, className)}
         style={{
           ...style,
+          zIndex: checked ? 50 : 10,
           backgroundColor: (hover || checked) ? adjustColorOpacityMemoize({ color }) : undefined,
         }}
         {...rest}
@@ -56,6 +57,7 @@ export function TimePoint(props: TimePointProps & React.ComponentProps<'div'>) {
       className={clsx(prefixCls, `${prefixCls}-dot`, className)}
       style={{
         ...style,
+        zIndex: checked ? 50 : 10,
         backgroundColor: (hover || checked) ? color : undefined,
       }}
       title={dayjs(time as Time).format(DEFAULT_FORMAT)}
