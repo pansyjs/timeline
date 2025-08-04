@@ -1,4 +1,4 @@
-import type { MeasureElement } from '@/hooks';
+import type { MeasureElements } from '@/hooks';
 import type {
   DataItem,
   Tick,
@@ -18,7 +18,7 @@ import {
   POINT_SIZE,
   SIZE_CONFIG,
 } from '@/config';
-import { useMeasureElement } from '@/hooks';
+import { useMeasureElements } from '@/hooks';
 import {
   calculatePositionFromTime,
   calculateTimeRange,
@@ -96,7 +96,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
   const ticks = generateTicks();
 
   /** 布局计算 */
-  const adjustPositions = (ins: MeasureElement<HTMLDivElement, HTMLDivElement>) => {
+  const adjustPositions = (ins: MeasureElements<HTMLDivElement, HTMLDivElement>) => {
     const itemRectCache = ins.itemRectCache;
     const content = contentRef.current;
     if (!content)
@@ -168,8 +168,8 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
     });
   };
 
-  const measureElement = useMeasureElement<HTMLDivElement, HTMLDivElement>({
-    getContainerElement: () => rootRef.current,
+  const measureElement = useMeasureElements<HTMLDivElement, HTMLDivElement>({
+    getContainerElement: () => contentRef.current,
     onChange: (ins) => {
       requestAnimationFrame(() => {
         adjustPositions(ins);
@@ -263,6 +263,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
       }}
     >
       <TimeLineContext.Provider value={contextValue}>
+        {/* 时间轴 */}
         <div
           className={`${prefixCls}-axis`}
           style={{
@@ -300,6 +301,7 @@ export function TimeLine<D extends DataItem = DataItem>(props: TimeLineProps<D>)
             );
           })}
         </div>
+        {/* 内容区 */}
         <div className={`${prefixCls}-content`} ref={contentRef}>
           {timeRange && data.map((item, index) => {
             const { time, id } = item;

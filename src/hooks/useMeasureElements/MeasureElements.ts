@@ -3,15 +3,15 @@ import { isEqual, omit } from 'es-toolkit';
 import { SIZE_CONFIG } from '@/config';
 import { measureElement } from './utils';
 
-export interface MeasureElementOptions<ContainerElement extends Element, ItemElement extends Element> {
+export interface MeasureElementsOptions<ContainerElement extends Element, ItemElement extends Element> {
   keyAttribute?: string;
   getContainerElement: () => ContainerElement | null;
   useAnimationFrameWithResizeObserver?: boolean;
-  onChange?: (instance: MeasureElement<ContainerElement, ItemElement>) => void;
+  onChange?: (instance: MeasureElements<ContainerElement, ItemElement>) => void;
 }
 
-export class MeasureElement<ContainerElement extends Element, ItemElement extends Element> {
-  options!: Required<MeasureElementOptions<ContainerElement, ItemElement>>;
+export class MeasureElements<ContainerElement extends Element, ItemElement extends Element> {
+  options!: Required<MeasureElementsOptions<ContainerElement, ItemElement>>;
   containerElement: ContainerElement | null = null;
   targetWindow: (Window & typeof globalThis) | null = null;
   itemRectCache = new Map<Key, VirtualItem>();
@@ -52,11 +52,11 @@ export class MeasureElement<ContainerElement extends Element, ItemElement extend
     };
   })();
 
-  constructor(opts: MeasureElementOptions<ContainerElement, ItemElement>) {
+  constructor(opts: MeasureElementsOptions<ContainerElement, ItemElement>) {
     this.setOptions(opts);
   }
 
-  setOptions = (opts: MeasureElementOptions<ContainerElement, ItemElement>) => {
+  setOptions = (opts: MeasureElementsOptions<ContainerElement, ItemElement>) => {
     Object.entries(opts).forEach(([key, value]) => {
       if (typeof value === 'undefined')
         delete (opts as any)[key];
@@ -68,7 +68,7 @@ export class MeasureElement<ContainerElement extends Element, ItemElement extend
         keyAttribute: 'data-key',
       },
       opts,
-    ) as Required<MeasureElementOptions<ContainerElement, ItemElement>>;
+    ) as Required<MeasureElementsOptions<ContainerElement, ItemElement>>;
   };
 
   private cleanup = () => {

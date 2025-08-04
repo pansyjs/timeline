@@ -1,21 +1,21 @@
-import type { MeasureElementOptions } from './MeasureElement';
+import type { MeasureElementsOptions } from './MeasureElements';
 import React from 'react';
 import { useIsomorphicLayoutEffect } from '../useIsomorphicLayoutEffect';
-import { MeasureElement } from './MeasureElement';
+import { MeasureElements } from './MeasureElements';
 
 /**
  * 测量元素
  * @param options
  */
-export function useMeasureElement<
+export function useMeasureElements<
   ContainerElement extends Element,
   ItemElement extends Element,
 >(
-  options: MeasureElementOptions<ContainerElement, ItemElement>,
+  options: MeasureElementsOptions<ContainerElement, ItemElement>,
 ) {
   const rerender = React.useReducer(() => ({}), {})[1];
 
-  const resolvedOptions: MeasureElementOptions<ContainerElement, ItemElement> = {
+  const resolvedOptions: MeasureElementsOptions<ContainerElement, ItemElement> = {
     ...options,
     onChange: (instance) => {
       rerender();
@@ -24,7 +24,7 @@ export function useMeasureElement<
   };
 
   const [instance] = React.useState(
-    () => new MeasureElement<ContainerElement, ItemElement>(resolvedOptions),
+    () => new MeasureElements<ContainerElement, ItemElement>(resolvedOptions),
   );
 
   instance.setOptions(resolvedOptions);

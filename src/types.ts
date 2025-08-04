@@ -4,7 +4,7 @@ import type {
   Key,
   Rect,
   VirtualItem,
-} from './hooks/useMeasureElement/types';
+} from './hooks/useMeasureElements/types';
 
 type Time = NonNullable<ConfigType>;
 
