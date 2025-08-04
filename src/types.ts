@@ -1,15 +1,12 @@
 import type { ConfigType, Dayjs } from 'dayjs';
 import type React from 'react';
+import type {
+  Key,
+  Rect,
+  VirtualItem,
+} from './hooks/useMeasureElement/types';
 
 type Time = NonNullable<ConfigType>;
-type Key = number | string | bigint;
-
-interface Rect {
-  /** 节点宽度 */
-  width: number;
-  /** 节点高度 */
-  height: number;
-}
 
 interface TimeRange {
   start: Time;
@@ -43,15 +40,6 @@ interface DataItem {
    */
   time: [Time, Time] | Time;
   [key: string]: any;
-}
-
-interface VirtualItem extends Rect {
-  /** 唯一标识 */
-  key: Key;
-  /** 横向坐标 */
-  x: number;
-  /** 纵向坐标 */
-  y: number;
 }
 
 interface Tick {

@@ -1,4 +1,4 @@
-import type { Key, VirtualItem } from '@/types';
+import type { Key, VirtualItem } from './types';
 import { isEqual, omit } from 'es-toolkit';
 import { SIZE_CONFIG } from '@/config';
 import { measureElement } from './utils';

@@ -3,6 +3,10 @@ import React from 'react';
 import { useIsomorphicLayoutEffect } from '../useIsomorphicLayoutEffect';
 import { MeasureElement } from './MeasureElement';
 
+/**
+ * 测量元素
+ * @param options
+ */
 export function useMeasureElement<
   ContainerElement extends Element,
   ItemElement extends Element,
