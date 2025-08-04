@@ -1,29 +1,6 @@
 import type { VirtualItem } from '../../types';
 
 /**
- * 判断是否存在遮挡
- * @param a
- * @param b
- */
-export function isOverlappingX(a: VirtualItem, b: VirtualItem) {
-  const aLeft = a.x;
-  const aRight = a.x + a.width;
-  const bLeft = b.x;
-  const bRight = b.x + b.width;
-
-  return aLeft < bRight && aRight > bLeft;
-}
-
-/**
- * 通过节点获取唯一标识
- * @param node
- * @param attributeKey
- */
-export function keyFromElement(node: HTMLDivElement, attributeKey = 'data-key') {
-  return node.getAttribute(attributeKey) || '';
-}
-
-/**
  * 将存在重叠关系的VirtualItem元素分组
  * 重叠包括直接重叠和间接重叠（A与B重叠，B与C重叠，则A、B、C视为一组）
  * @param items 待分组的元素数组
