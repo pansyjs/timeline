@@ -42,7 +42,8 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "es-toolkit": "^1.39.8",
-    "interactjs": "^1.10.27"
+    "interactjs": "^1.10.27",
+    "mitt": "^3.0.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.1.0",
@@ -70,6 +71,7 @@
     "semantic-release": "^24.2.7",
     "simple-git-hooks": "^2.13.1",
     "typescript": "~5.8.3",
+    "vis-timeline": "^8.2.1",
     "vitest": "^3.2.4"
   },
   "simple-git-hooks": {
