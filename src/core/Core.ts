@@ -1,3 +1,4 @@
+import type { Dayjs } from 'dayjs';
 import type { TimeAxis } from './components/TimeAxis';
 import type { HammerInput, HammerManager } from './module/hammer';
 import type { Range } from './Range';
@@ -130,7 +131,7 @@ export class Core {
     this._redraw();
   }
 
-  _toScreen(time: number) {
+  _toScreen(time: Dayjs) {
     return DateUtil.toScreen(this, time, this.props.center.width);
   }
 
@@ -182,6 +183,7 @@ export class Core {
 
     const centerWidth = props.root.width;
     props.top.width = centerWidth;
+    props.center.width = centerWidth;
 
     // 调整面板大小
     dom.top.style.width = `${props.top.width}px`;
