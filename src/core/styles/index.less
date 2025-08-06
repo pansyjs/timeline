@@ -1,0 +1,30 @@
+@import './base.less';
+
+@time-line-prefix-cls: ~'@{root-prefix}';
+
+.@{time-line-prefix-cls} {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(255, 0, 0, 0.321);
+  padding: 0;
+  margin: 0;
+
+  &-time-axis {
+    background-color: rgba(0, 255, 21, 0.321);
+    position: relative;
+    overflow: hidden;
+  }
+
+  &-time-axis&-foreground {
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  &-panel {
+    position: absolute;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+}

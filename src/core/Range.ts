@@ -1,41 +1,46 @@
-import type { ConfigType } from 'dayjs';
-import type { Body, DateType } from './types';
+/* eslint-disable react/no-unused-class-component-members */
+import type { Body, DateType, RangeProps, TimelineOptions } from './types';
 import dayjs from 'dayjs';
-
-interface RangeOptions {
-  start?: number | null;
-  end?: number | null;
-  min?: ConfigType;
-  max?: ConfigType;
-  // milliseconds
-  zoomMin?: number | string;
-  // milliseconds
-  zoomMax?: number | string;
-}
+import { Component } from './components/Component';
 
 interface SetRangeOptions {
-  animation?: boolean;
-  duration?: number;
-  easingFunction?: string;
+  /** 是否开启动画 */
+  animation?: boolean | {
+    /**
+     * 动画持续时间
+     * @default 500ms
+     */
+    duration?: number;
+    /**
+     * 缓动函数
+     * @default easeInOutQuad
+     */
+    easingFunction?: string;
+  };
   byUser?: boolean;
   event?: Event;
 }
 
-export class Range {
+export class Range extends Component {
   body: Body;
   millisecondsPerPixelCache?: number;
   /** 开始时间 */
-  private start: number;
+  start: number;
   /** 结束时间 */
-  private end: number;
-  defaultOptions: RangeOptions;
-  options: RangeOptions;
+  end: number;
+  defaultOptions: Required<TimelineOptions>;
+  options: Required<TimelineOptions>;
+  props: RangeProps;
+  timeoutId!: NodeJS.Timeout;
+  startToFront: boolean;
+  endToFront: boolean;
 
-  constructor(body: Body, options: RangeOptions) {
+  constructor(body: Body, options: TimelineOptions) {
+    super();
+
     const now = dayjs().startOf('day');
     const start = now.clone().add(-3, 'days').valueOf();
-    const end = now.clone().add(-3, 'days').valueOf();
-
+    const end = now.clone().add(3, 'days').valueOf();
     this.millisecondsPerPixelCache = undefined;
 
     if (options === undefined) {
@@ -48,44 +53,76 @@ export class Range {
     }
 
     this.body = body;
+    this.startToFront = false;
+    this.endToFront = true;
 
     this.defaultOptions = {
       start: null,
       end: null,
       min: null,
       max: null,
+      moveable: true,
+      zoomable: true,
       zoomMin: 10,
       zoomMax: 1000 * 60 * 60 * 24 * 365 * 10000,
-    };
+    } as unknown as Required<TimelineOptions>;
+    this.props = {
+      touch: {},
+    } as RangeProps;
     this.options = Object.assign({}, this.defaultOptions);
   }
 
+  setOptions(options: TimelineOptions) {
+    if (options) {
+      if ('start' in options || 'end' in options) {
+        // apply a new range. both start and end are optional
+        this.setRange(options.start, options.end);
+      }
+    }
+  }
+
   setRange(
-    start: DateType,
-    end: DateType,
-    options: boolean | SetRangeOptions,
-    callback: () => void,
+    start?: DateType,
+    end?: DateType,
+    options?: SetRangeOptions,
+    callback?: () => void,
   ) {
     if (!options) {
       options = {};
     }
 
-    if ((options as SetRangeOptions).byUser !== true) {
-      (options as SetRangeOptions).byUser = false;
+    if (options.byUser !== true) {
+      options.byUser = false;
     }
 
+    // eslint-disable-next-line ts/no-this-alias
+    const me = this;
     const finalStart = start !== undefined ? dayjs(start).valueOf() : null;
     const finalEnd = end !== undefined ? dayjs(end).valueOf() : null;
+    this.millisecondsPerPixelCache = undefined;
 
     const changed = this._applyRange(finalStart, finalEnd);
 
     if (changed) {
+      const params = {
+        start: new Date(this.start),
+        end: new Date(this.end),
+        byUser: options.byUser,
+        event: options.event!,
+      };
+
+      me.body.emitter.emit('rangechange', params);
+      me.timeoutId && clearTimeout(me.timeoutId);
+      me.timeoutId = setTimeout(
+        () => {
+          me.body.emitter.emit('rangechanged', params);
+        },
+        200,
+      );
       if (callback) {
         return callback();
       }
     }
-
-    this.millisecondsPerPixelCache = undefined;
   }
 
   /** 获取范围 */
@@ -94,6 +131,16 @@ export class Range {
       start: this.start,
       end: this.end,
     };
+  }
+
+  /**
+   * 根据提供的宽度，计算当前范围的转换偏移量和比例
+   * @param {number} width
+   * @param {number} [totalHidden]
+   * @returns {{offset: number, scale: number}} conversion
+   */
+  conversion(width: number, totalHidden = 0) {
+    return Range.conversion(this.start, this.end, width, totalHidden);
   }
 
   /**
@@ -156,7 +203,7 @@ export class Range {
 
     // prevent (end-start) < zoomMin
     if (this.options.zoomMin !== null) {
-      let zoomMin = Number.parseFloat(this.options.zoomMin as string);
+      let zoomMin = this.options.zoomMin;
       if (zoomMin < 0) {
         zoomMin = 0;
       }
@@ -180,7 +227,7 @@ export class Range {
 
     // prevent (end-start) > zoomMax
     if (this.options.zoomMax !== null) {
-      let zoomMax = Number.parseFloat(this.options.zoomMax as string);
+      let zoomMax = this.options.zoomMax;
       if (zoomMax < 0) {
         zoomMax = 0;
       }
@@ -206,5 +253,28 @@ export class Range {
     this.end = newEnd;
 
     return changed;
+  }
+
+  /**
+   * 根据提供的开始、结束和宽度，计算范围的转换偏移量和比例的静态方法
+   * @param {number} start
+   * @param {number} end
+   * @param {number} width
+   * @param {number} [totalHidden]
+   * @returns {{ offset: number, scale: number }} conversion
+   */
+  static conversion(start: number, end: number, width: number, totalHidden = 0) {
+    if (width !== 0 && (end - start !== 0)) {
+      return {
+        offset: start,
+        scale: width / (end - start - totalHidden),
+      };
+    }
+    else {
+      return {
+        offset: 0,
+        scale: 1,
+      };
+    }
   }
 }
