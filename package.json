@@ -47,6 +47,7 @@
     "mitt": "^3.0.1",
     "propagating-hammerjs": "^3.0.0",
     "type-fest": "^4.41.0",
+    "vis-data": "^8.0.1",
     "vis-util": "^6.0.0"
   },
   "devDependencies": {
