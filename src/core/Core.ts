@@ -14,6 +14,7 @@ import { option } from 'vis-util/esnext';
 import Hammer from './module/hammer';
 import * as DateUtil from './utils/date';
 import * as hammerUtil from './utils/hammer';
+import { getWheelType } from './utils/util';
 
 export class Core {
   private redrawCount: number = 0;
@@ -120,6 +121,9 @@ export class Core {
       me.emitter.emit('release', event);
     });
 
+    const wheelType = getWheelType();
+    this.dom.top.addEventListener(wheelType, this.onWheel.bind(this), false);
+
     this.touch = {} as Touch;
 
     this.redrawCount = 0;
@@ -164,6 +168,10 @@ export class Core {
   /** 重新绘制 */
   redraw() {
     this._redraw();
+  }
+
+  onWheel(event: WheelEvent) {
+    this.emitter.emit('wheel', event);
   }
 
   _toScreen(time: number) {
@@ -277,6 +285,7 @@ export class Core {
 
     // 调整面板大小
     dom.top.style.width = `${props.top.width}px`;
+    dom.centerContainer.style.width = `${props.center.width}px`;
 
     // 重新定位面板
     dom.background.style.left = '0';

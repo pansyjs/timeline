@@ -76,3 +76,14 @@ export function typeCoerceDataSet(
     dispose: () => pipe.stop(),
   };
 }
+
+export function getWheelType() {
+  const wheelType = 'onwheel' in document.createElement('div')
+    ? 'wheel'
+    // @ts-expect-error 兼容代码
+    : document.onmousewheel !== undefined
+      ? 'mousewheel'
+      : 'onmousewheel';
+
+  return wheelType as 'wheel';
+}

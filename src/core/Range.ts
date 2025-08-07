@@ -26,7 +26,7 @@ interface SetRangeOptions {
     easingFunction?: string;
   };
   byUser?: boolean;
-  event?: HammerInput;
+  event?: HammerInput | WheelEvent;
 }
 
 export class Range extends Component {
@@ -87,8 +87,12 @@ export class Range extends Component {
     // 监听拖动事件
     this.body.emitter.on('panstart', this._onDragStart.bind(this));
     this.body.emitter.on('panmove', this._onDrag.bind(this));
+    this.body.emitter.on('panend', this._onDragEnd.bind(this));
+
+    this.body.emitter.on('wheel', this._onWheel.bind(this));
 
     this.body.emitter.on('touch', this._onTouch.bind(this));
+    this.body.emitter.on('pinch', this._onPinch.bind(this));
   }
 
   setOptions(options: TimelineOptions) {
@@ -150,6 +154,40 @@ export class Range extends Component {
       start: this.start,
       end: this.end,
     };
+  }
+
+  zoom(scale: number, center: number, delta: number, event: WheelEvent) {
+    if (center == null) {
+      center = (this.start + this.end) / 2;
+    }
+
+    const hiddenDuration = DateUtil.getHiddenDurationBetween(this.body.hiddenDates, this.start, this.end);
+    const hiddenDurationBefore = DateUtil.getHiddenDurationBefore(this.body.hiddenDates, this, center);
+    const hiddenDurationAfter = hiddenDuration - hiddenDurationBefore;
+
+    let newStart = (center - hiddenDurationBefore) + (this.start - (center - hiddenDurationBefore)) * scale;
+    let newEnd = (center + hiddenDurationAfter) + (this.end - (center + hiddenDurationAfter)) * scale;
+
+    this.startToFront = !(delta > 0);
+    this.endToFront = !(-delta > 0);
+
+    const safeStart = DateUtil.snapAwayFromHidden(this.body.hiddenDates, newStart, delta, true);
+    const safeEnd = DateUtil.snapAwayFromHidden(this.body.hiddenDates, newEnd, -delta, true);
+
+    if (safeStart !== newStart || safeEnd !== newEnd) {
+      newStart = safeStart;
+      newEnd = safeEnd;
+    }
+
+    const options = {
+      animation: false,
+      byUser: true,
+      event,
+    };
+    this.setRange(newStart, newEnd, options);
+
+    this.startToFront = false;
+    this.endToFront = true;
   }
 
   /**
@@ -271,13 +309,76 @@ export class Range extends Component {
     });
   }
 
+  _onWheel(event: WheelEvent) {
+    let delta = 0;
+
+    // @ts-expect-error 兼容代码
+    if (event.wheelDelta) {
+      // @ts-expect-error 兼容代码
+      delta = event.wheelDelta / 120;
+    }
+    else if (event.detail) {
+      delta = -event.detail / 3;
+    }
+    else if (event.deltaY) {
+      delta = -event.deltaY / 3;
+    }
+
+    if (!(this.options.zoomable && this.options.moveable))
+      return;
+
+    if (!this._isInsideRange(event))
+      return;
+
+    if (delta) {
+      const zoomFriction = this.options.zoomFriction || 5;
+
+      let scale;
+      if (delta < 0) {
+        scale = 1 - (delta / zoomFriction);
+      }
+      else {
+        scale = 1 / (1 + (delta / zoomFriction));
+      }
+
+      const pointer = this.getPointer({ x: event.clientX, y: event.clientY }, this.body.dom.center);
+      const pointerDate = this._pointerToDate(pointer);
+
+      this.zoom(scale, pointerDate, delta, event);
+
+      event.preventDefault();
+    }
+  }
+
+  getPointer(touch: { x: number; y: number }, element: HTMLElement) {
+    const elementRect = element.getBoundingClientRect();
+
+    return {
+      x: touch.x - elementRect.left,
+      y: touch.y - elementRect.top,
+    };
+  }
+
+  _pointerToDate(pointer: { x: number; y: number }) {
+    return this.body.util.toTime(pointer.x).valueOf();
+  }
+
+  _onPinch(event: HammerInput) {
+    if (!(this.options.zoomable && this.options.moveable))
+      return;
+
+    preventDefault(event as unknown as Event);
+
+    this.props.touch.allowDragging = false;
+  }
+
   /**
    * 测试鼠标事件中的鼠标是否位于可见窗口内，
    * 当前开始日期和结束日期之间
    * @param event 当位于可见窗口内时返回 true
    * @return {boolean}
    */
-  _isInsideRange(event: HammerInput) {
+  _isInsideRange(event: HammerInput | WheelEvent) {
     // @ts-expect-error 兼容代码
     const clientX = event.center ? event.center.x : event.clientX;
     const centerContainerRect = this.body.dom.centerContainer.getBoundingClientRect();

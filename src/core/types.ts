@@ -43,21 +43,24 @@ interface RangeChangeEvent {
   end: Date;
   /** 是否由用户触发 */
   byUser: boolean;
-  event: HammerInput;
+  event: HammerInput | WheelEvent;
 }
 // eslint-disable-next-line ts/consistent-type-definitions
 type Events = {
   verticalDrag: void;
   touch: HammerInput;
   release: HammerInput;
-  // 拖动相关事件
+  // 捏合
+  pinch: HammerInput;
+  // 拖动
   pan: HammerInput;
   panstart: HammerInput;
   panmove: HammerInput;
   panend: HammerInput;
-  // Range 相关事件
+  // Range
   rangechange: RangeChangeEvent;
   rangechanged: RangeChangeEvent;
+  wheel: WheelEvent;
   _change: void;
   changed: void;
 };
@@ -204,6 +207,7 @@ interface TimelineOptions {
   showMinorLabels: boolean;
   showMajorLabels: boolean;
   showWeekScale: boolean;
+  zoomFriction: number;
   /**
    * 隐藏的时间
    * @default []
