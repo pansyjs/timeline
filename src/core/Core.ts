@@ -1,7 +1,15 @@
 import type { TimeAxis } from './components/TimeAxis';
-import type { HammerInput, HammerManager } from './module/hammer';
 import type { Range } from './Range';
-import type { Body, Dom, EventKeys, Props, TimelineOptions } from './types';
+import type {
+  Body,
+  Dom,
+  EventKeys,
+  HammerInput,
+  HammerManager,
+  Props,
+  TimelineOptions,
+  Touch,
+} from './types';
 import { option } from 'vis-util/esnext';
 import Hammer from './module/hammer';
 import * as DateUtil from './utils/date';
@@ -9,6 +17,7 @@ import * as hammerUtil from './utils/hammer';
 
 export class Core {
   private redrawCount: number = 0;
+  private touch!: Touch;
   dom!: Dom;
   body!: Body;
   hammer!: HammerManager;
@@ -19,6 +28,7 @@ export class Core {
   props!: Props;
   components!: any[];
   initialDrawDone!: boolean;
+  initialRangeChangeDone!: boolean;
 
   _create(container: HTMLElement) {
     const { prefixCls } = this.options;
@@ -52,10 +62,26 @@ export class Core {
       centerContainer: {},
       center: {},
       top: {},
+      scrollTop: 0,
+      scrollTopMin: 0,
     } as Props;
+
+    this.emitter.on('touch', this._onTouch.bind(this));
+    this.emitter.on('panmove', this._onDrag.bind(this));
 
     // eslint-disable-next-line ts/no-this-alias
     const me = this;
+
+    this.emitter.on('rangechange', () => {
+      if (this.initialDrawDone === true) {
+        this._redraw();
+      }
+    });
+    this.emitter.on('rangechanged', () => {
+      if (!this.initialRangeChangeDone) {
+        this.initialRangeChangeDone = true;
+      }
+    });
 
     this.hammer = new Hammer(this.dom.root);
     const pinchRecognizer = this.hammer.get('pinch').set({ enable: true });
@@ -87,8 +113,18 @@ export class Core {
       me.hammer.on(type, listener);
     });
 
+    hammerUtil.onTouch(this.hammer, (event) => {
+      me.emitter.emit('touch', event);
+    });
+    hammerUtil.onRelease(this.hammer, (event) => {
+      me.emitter.emit('release', event);
+    });
+
+    this.touch = {} as Touch;
+
     this.redrawCount = 0;
     this.initialDrawDone = false;
+    this.initialRangeChangeDone = false;
 
     if (!container)
       throw new Error('No container provided');
@@ -151,7 +187,13 @@ export class Core {
     dom.root.style.width = option.asSize(options.width, '')!;
     const rootOffsetWidth = dom.root.offsetWidth;
 
-    // 面板宽度
+    props.center.height = dom.center.offsetHeight;
+
+    // 计算面板的高度
+    props.root.height = dom.root.offsetHeight;
+    props.centerContainer.height = props.root.height;
+
+    // 计算面板的宽度
     props.root.width = rootOffsetWidth;
 
     this._setDOM();
@@ -172,8 +214,57 @@ export class Core {
       }
     }
     else {
-      this.body.emitter.emit('changed');
+      this.redrawCount = 0;
     }
+
+    this.body.emitter.emit('changed');
+  }
+
+  _onTouch() {
+    this.touch.allowDragging = true;
+    this.touch.initialScrollTop = this.props.scrollTop;
+  }
+
+  _onDrag(event: HammerInput) {
+    if (!event)
+      return;
+    if (!this.touch.allowDragging)
+      return;
+
+    const delta = event.deltaY;
+
+    const oldScrollTop = this._getScrollTop();
+    const newScrollTop = this._setScrollTop(this.touch.initialScrollTop + delta);
+
+    if (newScrollTop !== oldScrollTop) {
+      this.emitter.emit('verticalDrag');
+    }
+  }
+
+  _getScrollTop() {
+    return this.props.scrollTop;
+  }
+
+  _setScrollTop(scrollTop: number) {
+    this.props.scrollTop = scrollTop;
+    this._updateScrollTop();
+
+    return this.props.scrollTop;
+  }
+
+  _updateScrollTop() {
+    // 重新计算 scrollTopMin
+    const scrollTopMin = Math.min(this.props.centerContainer.height - this.props.center.height, 0); // is negative or zero
+    if (scrollTopMin !== this.props.scrollTopMin) {
+      this.props.scrollTopMin = scrollTopMin;
+    }
+
+    if (this.props.scrollTop > 0)
+      this.props.scrollTop = 0;
+    if (this.props.scrollTop < scrollTopMin)
+      this.props.scrollTop = scrollTopMin;
+
+    return this.props.scrollTop;
   }
 
   _setDOM() {

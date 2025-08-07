@@ -1,8 +1,14 @@
+import type Hammer from '@egjs/hammerjs';
 import type { Emitter } from 'mitt';
 import type { KeysOfUnion } from 'type-fest';
 import type { DataInterface } from 'vis-data';
-import type { HammerInput } from './module/hammer';
 import type { Range } from './Range';
+
+// ----------- Hammer ----------
+type HammerType = typeof Hammer;
+type HammerManager = InstanceType<HammerType>;
+type HammerRecognizer = ReturnType<HammerManager['get']>;
+type HammerInput = Parameters<HammerRecognizer['emit']>['0'];
 
 type DateType = Date | number | string;
 type IdType = string | number;
@@ -31,13 +37,19 @@ type TimeAxisScaleType
     | 'year';
 
 interface RangeChangeEvent {
+  /** 开始时间 */
   start: Date;
+  /** 结束时间 */
   end: Date;
+  /** 是否由用户触发 */
   byUser: boolean;
-  event: Event;
+  event: HammerInput;
 }
 // eslint-disable-next-line ts/consistent-type-definitions
 type Events = {
+  verticalDrag: void;
+  touch: HammerInput;
+  release: HammerInput;
   // 拖动相关事件
   pan: HammerInput;
   panstart: HammerInput;
@@ -61,6 +73,12 @@ interface PropsItem {
   right: number;
 }
 
+interface Touch {
+  /** 是否允许拖动 */
+  allowDragging: boolean;
+  initialScrollTop: number;
+}
+
 interface Props {
   root: PropsItem;
   background: PropsItem;
@@ -68,6 +86,8 @@ interface Props {
   center: PropsItem;
   top: PropsItem;
   scrollbarWidth: number;
+  scrollTop: number;
+  scrollTopMin: number;
 }
 
 interface FormatItem {
@@ -189,6 +209,8 @@ interface TimelineOptions {
    * @default []
    */
   hiddenDates?: HiddenDatesType;
+  /** 初始绘制完成 */
+  onInitialDrawComplete?: () => void;
 }
 
 interface RangeOptions {
@@ -203,14 +225,23 @@ interface RangeOptions {
 }
 
 interface RangeProps {
-  touch: {
-    start: number;
-    end: number;
-    center: number;
-    centerDate: number;
-    dragging: boolean;
-    allowDragging: boolean;
-  };
+  touch: RangeTouch;
+}
+
+interface RangeTouch {
+  /** 开始时间 */
+  start: number;
+  /** 结束时间 */
+  end: number;
+  /** 是否允许拖动 */
+  allowDragging: boolean;
+  /** 是否拖动 */
+  dragging: boolean;
+  center: {
+    x: number;
+    y: number;
+  } | null;
+  centerDate: number | null;
 }
 
 interface TimeAxisOptions {
@@ -227,11 +258,17 @@ export type {
   Dom,
   EventKeys,
   Format,
+  HammerInput,
+  HammerManager,
+  HammerRecognizer,
+  HammerType,
   HiddenDatesType,
   Props,
   RangeOptions,
   RangeProps,
+  RangeTouch,
   TimeAxisOptions,
   TimeAxisScaleType,
   TimelineOptions,
+  Touch,
 };

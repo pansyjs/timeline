@@ -237,8 +237,8 @@ export class TimeAxis extends Component {
     }
     label.className = `${prefixCls}-tick ${prefixCls}-minor ${className}`;
 
-    const y = this.props.majorLabelHeight;
-    this._setXY(label, x, y);
+    // const y = this.props.majorLabelHeight;
+    this._setXY(label, x, 0);
 
     this.dom.minorTexts.push(label);
     return label;
@@ -262,8 +262,7 @@ export class TimeAxis extends Component {
     }
     label.className = `${prefixCls}-tick ${prefixCls}-major ${className}`;
 
-    const y = 0;
-    this._setXY(label, x, y);
+    this._setXY(label, x, 0);
 
     this.dom.majorTexts.push(label);
     return label;

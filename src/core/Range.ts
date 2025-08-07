@@ -1,7 +1,15 @@
 /* eslint-disable react/no-unused-class-component-members */
-import type { Body, DateType, RangeProps, TimelineOptions } from './types';
+import type {
+  Body,
+  DateType,
+  HammerInput,
+  RangeProps,
+  TimelineOptions,
+} from './types';
 import dayjs from 'dayjs';
+import { preventDefault } from 'vis-util/esnext';
 import { Component } from './components/Component';
+import * as DateUtil from './utils/date';
 
 interface SetRangeOptions {
   /** 是否开启动画 */
@@ -18,7 +26,7 @@ interface SetRangeOptions {
     easingFunction?: string;
   };
   byUser?: boolean;
-  event?: Event;
+  event?: HammerInput;
 }
 
 export class Range extends Component {
@@ -34,6 +42,9 @@ export class Range extends Component {
   timeoutId!: NodeJS.Timeout;
   startToFront: boolean;
   endToFront: boolean;
+  deltaDifference: number;
+  previousDelta!: number;
+  scaleOffset: number;
 
   constructor(body: Body, options: TimelineOptions) {
     super();
@@ -53,6 +64,8 @@ export class Range extends Component {
     }
 
     this.body = body;
+    this.deltaDifference = 0;
+    this.scaleOffset = 0;
     this.startToFront = false;
     this.endToFront = true;
 
@@ -70,6 +83,12 @@ export class Range extends Component {
       touch: {},
     } as RangeProps;
     this.options = Object.assign({}, this.defaultOptions);
+
+    // 监听拖动事件
+    this.body.emitter.on('panstart', this._onDragStart.bind(this));
+    this.body.emitter.on('panmove', this._onDrag.bind(this));
+
+    this.body.emitter.on('touch', this._onTouch.bind(this));
   }
 
   setOptions(options: TimelineOptions) {
@@ -141,6 +160,133 @@ export class Range extends Component {
    */
   conversion(width: number, totalHidden = 0) {
     return Range.conversion(this.start, this.end, width, totalHidden);
+  }
+
+  _onTouch(event: HammerInput) {
+    this.props.touch.start = this.start;
+    this.props.touch.end = this.end;
+    this.props.touch.allowDragging = true;
+    this.props.touch.center = null;
+    this.props.touch.centerDate = null;
+    this.scaleOffset = 0;
+    this.deltaDifference = 0;
+
+    preventDefault(event as unknown as Event);
+  }
+
+  _onDragStart(event: HammerInput) {
+    this.deltaDifference = 0;
+    this.previousDelta = 0;
+
+    if (!this.options.moveable)
+      return;
+
+    if (!this._isInsideRange(event))
+      return;
+
+    if (!this.props.touch.allowDragging)
+      return;
+
+    this.props.touch.start = this.start;
+    this.props.touch.end = this.end;
+    this.props.touch.dragging = true;
+
+    if (this.body.dom.root) {
+      this.body.dom.root.style.cursor = 'move';
+    }
+  }
+
+  _onDrag(event: HammerInput) {
+    if (!event)
+      return;
+
+    if (!this.props.touch.dragging)
+      return;
+
+    if (!this.options.moveable)
+      return;
+
+    if (!this.props.touch.allowDragging)
+      return;
+
+    let delta = event.deltaX;
+    delta -= this.deltaDifference;
+    let interval = (this.props.touch.end - this.props.touch.start);
+
+    const duration = DateUtil.getHiddenDurationBetween(this.body.hiddenDates, this.start, this.end);
+    interval -= duration;
+
+    const width = this.body.domProps.center.width;
+    const diffRange = delta / width * interval;
+
+    const newStart = this.props.touch.start + diffRange;
+    const newEnd = this.props.touch.end + diffRange;
+
+    const safeStart = DateUtil.snapAwayFromHidden(this.body.hiddenDates, newStart, this.previousDelta - delta, true);
+    const safeEnd = DateUtil.snapAwayFromHidden(this.body.hiddenDates, newEnd, this.previousDelta - delta, true);
+
+    if (safeStart !== newStart || safeEnd !== newEnd) {
+      this.deltaDifference += delta;
+      this.props.touch.start = safeStart;
+      this.props.touch.end = safeEnd;
+      this._onDrag(event);
+      return;
+    }
+
+    this.previousDelta = delta;
+    this._applyRange(newStart, newEnd);
+
+    const startDate = new Date(this.start);
+    const endDate = new Date(this.end);
+
+    this.body.emitter.emit('rangechange', {
+      start: startDate,
+      end: endDate,
+      byUser: true,
+      event,
+    });
+  }
+
+  _onDragEnd(event: HammerInput) {
+    if (!this.props.touch.dragging)
+      return;
+
+    if (!this.options.moveable)
+      return;
+
+    if (!this.props.touch.allowDragging)
+      return;
+
+    this.props.touch.dragging = false;
+
+    if (this.body.dom.root) {
+      this.body.dom.root.style.cursor = 'auto';
+    }
+
+    this.body.emitter.emit('rangechanged', {
+      start: new Date(this.start),
+      end: new Date(this.end),
+      byUser: true,
+      event,
+    });
+  }
+
+  /**
+   * 测试鼠标事件中的鼠标是否位于可见窗口内，
+   * 当前开始日期和结束日期之间
+   * @param event 当位于可见窗口内时返回 true
+   * @return {boolean}
+   */
+  _isInsideRange(event: HammerInput) {
+    // @ts-expect-error 兼容代码
+    const clientX = event.center ? event.center.x : event.clientX;
+    const centerContainerRect = this.body.dom.centerContainer.getBoundingClientRect();
+
+    const x = clientX - centerContainerRect.left;
+
+    const time = this.body.util.toTime(x).valueOf();
+
+    return time >= this.start && time <= this.end;
   }
 
   /**
@@ -216,12 +362,12 @@ export class Range extends Component {
           newStart = this.start;
           newEnd = this.end;
         }
-      }
-      else {
-        // zoom to the minimum
-        diff = (zoomMin - (newEnd - newStart));
-        newStart -= diff / 2;
-        newEnd += diff / 2;
+        else {
+          // zoom to the minimum
+          diff = (zoomMin - (newEnd - newStart));
+          newStart -= diff / 2;
+          newEnd += diff / 2;
+        }
       }
     }
 

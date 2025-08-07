@@ -1,4 +1,4 @@
-import type { HammerInput, HammerManager, Recognizer } from '../module/hammer';
+import type { HammerInput, HammerManager, HammerRecognizer } from '../types';
 
 interface ReleaseCallback {
   (event: HammerInput): void;
@@ -21,7 +21,7 @@ export function onTouch(hammer: HammerManager, callback: ReleaseCallback) {
 }
 
 /**
- * 注册发布事件，发生在手势之前
+ * 注册发布事件，发生在手势之后
  * @param {Hammer} hammer
  * @param {Function} callback
  */
@@ -60,7 +60,7 @@ export const offRelease = offTouch;
  * @param {Hammer.Pinch} pinchRecognizer
  * @return {Hammer.Pinch} returns the pinchRecognizer
  */
-export function disablePreventDefaultVertically(pinchRecognizer: Recognizer) {
+export function disablePreventDefaultVertically(pinchRecognizer: HammerRecognizer) {
   const TOUCH_ACTION_PAN_Y = 'pan-y';
 
   pinchRecognizer.getTouchAction = function () {

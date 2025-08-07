@@ -10,6 +10,7 @@ import { isDataViewLike, typeCoerceDataSet } from './utils/util';
 export class Timeline extends Core {
   private defaultOptions: TimelineOptions;
   private itemsDone: boolean;
+  private initialFitDone: boolean;
   itemsData!: ReturnType<typeof typeCoerceDataSet>;
 
   constructor(container: HTMLElement, items: DataItemCollectionType, options?: TimelineOptions) {
@@ -53,9 +54,25 @@ export class Timeline extends Core {
     this.timeAxis = new TimeAxis(this.body);
     this.components.push(this.timeAxis);
 
+    this.initialFitDone = false;
     this.emitter.on('changed', () => {
-      // eslint-disable-next-line no-console
-      console.log('changed');
+      if (me.itemsData === null)
+        return;
+
+      if (!me.initialFitDone) {
+        me.initialFitDone = true;
+      }
+
+      if (!me.initialDrawDone && (me.initialRangeChangeDone || (!me.options.start && !me.options.end))) {
+        me.initialDrawDone = true;
+
+        me.dom.root.style.visibility = 'visible';
+        if (me.options.onInitialDrawComplete) {
+          setTimeout(() => {
+            return me.options.onInitialDrawComplete();
+          }, 0);
+        }
+      }
     });
 
     // apply options
