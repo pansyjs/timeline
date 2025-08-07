@@ -1,4 +1,4 @@
-import { memoize } from 'es-toolkit/function';
+import { memoize } from 'es-toolkit';
 
 interface AdjustColorOpacityOptions {
   color: string;

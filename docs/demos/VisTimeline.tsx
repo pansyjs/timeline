@@ -12,6 +12,9 @@ function Demo() {
       if (root) {
         const timeline = new Timeline(root, [], {
           showCurrentTime: false,
+          hiddenDates: [
+            { start: '2025-08-07 00:00:00', end: '2025-08-08 00:00:00' },
+          ],
         });
 
         return () => {

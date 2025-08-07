@@ -39,11 +39,8 @@
   },
   "dependencies": {
     "@egjs/hammerjs": "^2.0.17",
-    "@tanstack/react-virtual": "^3.13.12",
-    "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "es-toolkit": "^1.39.8",
-    "interactjs": "^1.10.27",
     "mitt": "^3.0.1",
     "propagating-hammerjs": "^3.0.0",
     "type-fest": "^4.41.0",
