@@ -32,6 +32,9 @@ export default defineConfig({
     resolve: {
       alias: {
         '@pansy/react-timeline': './src',
+        'dayjs/plugin/isoweek': './node_modules/dayjs/plugin/isoWeek.js',
+        'dayjs/plugin/weekday': './node_modules/dayjs/plugin/weekday.js',
+        'dayjs': './node_modules/dayjs',
       },
     },
   },
