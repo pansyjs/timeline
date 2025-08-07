@@ -4,6 +4,7 @@ import type { Body, Format, TimeAxisScaleType } from './types';
 import dayjs from 'dayjs';
 import isoweek from 'dayjs/plugin/isoweek';
 import weekday from 'dayjs/plugin/weekday';
+import { FORMAT } from './config';
 import * as DateUtil from './utils/date';
 
 dayjs.extend(weekday);
@@ -55,7 +56,7 @@ export class TimeStep {
       this.hiddenDates = [];
     }
 
-    this.format = TimeStep.FORMAT;
+    this.format = FORMAT;
   }
 
   setRange(start: Date, end: Date, minimumStep: number) {
@@ -468,29 +469,4 @@ export class TimeStep {
     if (stepMillisecond * 5 > minimumStep) { this.scale = 'millisecond'; this.step = 5; }
     if (stepMillisecond > minimumStep) { this.scale = 'millisecond'; this.step = 1; }
   }
-
-  static FORMAT = {
-    minorLabels: {
-      millisecond: 'SSS',
-      second: 's',
-      minute: 'HH:mm',
-      hour: 'HH:mm',
-      weekday: 'ddd D',
-      day: 'D',
-      week: 'w',
-      month: 'MMM',
-      year: 'YYYY',
-    },
-    majorLabels: {
-      millisecond: 'HH:mm:ss',
-      second: 'D MMMM HH:mm',
-      minute: 'ddd D MMMM',
-      hour: 'ddd D MMMM',
-      weekday: 'MMMM YYYY',
-      day: 'YYYY-MM',
-      week: 'MMMM YYYY',
-      month: 'YYYY',
-      year: '',
-    },
-  };
 }

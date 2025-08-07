@@ -82,7 +82,7 @@ export class TimeAxis extends Component {
     const { prefixCls } = this.body;
     this.dom.foreground = document.createElement('div');
 
-    this.dom.foreground.className = `${prefixCls}-time-axis ${prefixCls}-foreground`;
+    this.dom.foreground.className = `${prefixCls}-axis`;
   }
 
   redraw() {
@@ -219,7 +219,7 @@ export class TimeAxis extends Component {
     });
   }
 
-  _repaintMinorText(x: number, text: string, className: string) {
+  _repaintMinorText(x: number, text: string, className: string = '') {
     const { prefixCls } = this.body;
     let label = this.dom.redundant.minorTexts.shift();
 
@@ -237,14 +237,13 @@ export class TimeAxis extends Component {
     }
     label.className = `${prefixCls}-tick ${prefixCls}-minor ${className}`;
 
-    // const y = this.props.majorLabelHeight;
     this._setXY(label, x, 0);
 
     this.dom.minorTexts.push(label);
     return label;
   }
 
-  _repaintMajorText(x: number, text: string, className: string) {
+  _repaintMajorText(x: number, text: string, className: string = '') {
     const { prefixCls } = this.body;
     let label = this.dom.redundant.majorTexts.shift();
 

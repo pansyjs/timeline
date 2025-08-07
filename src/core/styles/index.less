@@ -9,15 +9,64 @@
   padding: 0;
   margin: 0;
 
-  &-time-axis {
+  // 时间轴
+  &-axis {
     position: relative;
     overflow: hidden;
-  }
-
-  &-time-axis&-foreground {
     left: 0;
     top: 0;
     width: 100%;
+  }
+
+  &-tick {
+    position: absolute;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+
+    &:before {
+      content: ' ';
+      position: absolute;
+      bottom: 0px;
+      left: 0;
+      height: 8px;
+      width: 1px;
+      background-color: @tick-minor-color;
+      // transform: translate(-50%);
+    }
+  }
+
+  &-tick-text {
+    position: absolute;
+    height: 20px;
+    line-height: 20px;
+    font-size: 12px;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  &-minor {
+    color: @tick-minor-text-color;
+
+    .@{time-line-prefix-cls}-tick-text {
+      bottom: 12px;
+      // transform: translate(-50%);
+    }
+  }
+
+  &-major {
+    color: @tick-major-text-color;
+    font-weight: 600;
+
+    .@{time-line-prefix-cls}-tick-text {
+      top: 0;
+      // transform: translate(-50%);
+    }
+
+    &:before {
+      display: none;
+    }
   }
 
   &-panel {
@@ -31,40 +80,6 @@
     font-size: 12px;
     white-space: nowrap;
     user-select: none;
-  }
-
-  &-tick {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-
-    &:before {
-      content: ' ';
-      position: absolute;
-      bottom: 0px;
-      left: 0;
-      height: 8px;
-      width: 1px;
-      background-color: @tick-color;
-    }
-  }
-
-  &-minor {
-    color: @tick-label-color;
-  }
-
-  &-major {
-    color: @color-grey;
-    bottom: 16px;
-  }
-
-  &-tick-text {
-    position: absolute;
-    bottom: 12px;
-    font-size: 12px;
-    white-space: nowrap;
-    user-select: none;
-    // transform: translate(-50%);
   }
 
   &-measure {
