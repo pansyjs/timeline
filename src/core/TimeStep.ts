@@ -1,4 +1,5 @@
 /* eslint-disable style/max-statements-per-line */
+import type { Dayjs } from 'dayjs';
 import type { Body, Format, TimeAxisScaleType } from './types';
 import dayjs from 'dayjs';
 import isoweek from 'dayjs/plugin/isoweek';
@@ -14,9 +15,9 @@ interface TimeStepOptions {
 }
 
 export class TimeStep {
-  private _start: dayjs.Dayjs;
-  private _end: dayjs.Dayjs;
-  current: dayjs.Dayjs;
+  private _start: Dayjs;
+  private _end: Dayjs;
+  current: Dayjs;
   scale: TimeAxisScaleType;
   step: number;
   options: TimeStepOptions;
@@ -63,8 +64,8 @@ export class TimeStep {
       throw 'No legal start or end date in method setRange';
     }
 
-    this._start = (start !== undefined) ? dayjs(start.valueOf()) : Date.now();
-    this._end = (end !== undefined) ? dayjs(end.valueOf()) : Date.now();
+    this._start = (start !== undefined) ? dayjs(start.valueOf()) : this._start;
+    this._end = (end !== undefined) ? dayjs(end.valueOf()) : this._end;
 
     if (this.autoScale) {
       this.setMinimumStep(minimumStep);
@@ -294,7 +295,7 @@ export class TimeStep {
       return (value / step % 2 === 0) ? ' vis-even' : ' vis-odd';
     }
 
-    function today(date: dayjs.Dayjs) {
+    function today(date: Dayjs) {
       if (date.isSame(Date.now(), 'day')) {
         return ' vis-today';
       }
@@ -307,15 +308,15 @@ export class TimeStep {
       return '';
     }
 
-    function currentWeek(date: dayjs.Dayjs) {
+    function currentWeek(date: Dayjs) {
       return date.isSame(Date.now(), 'week') ? ' vis-current-week' : '';
     }
 
-    function currentMonth(date: dayjs.Dayjs) {
+    function currentMonth(date: Dayjs) {
       return date.isSame(Date.now(), 'month') ? ' vis-current-month' : '';
     }
 
-    function currentYear(date: dayjs.Dayjs) {
+    function currentYear(date: Dayjs) {
       return date.isSame(Date.now(), 'year') ? ' vis-current-year' : '';
     }
 
@@ -449,7 +450,7 @@ export class TimeStep {
     if (stepDay * 7 > minimumStep && this.options.showWeekScale) { this.scale = 'week'; this.step = 1; }
     if (stepDay * 2 > minimumStep) { this.scale = 'day'; this.step = 2; }
     if (stepDay > minimumStep) { this.scale = 'day'; this.step = 1; }
-    if (stepDay / 2 > minimumStep) { this.scale = 'weekday'; this.step = 1; }
+    // if (stepDay / 2 > minimumStep) { this.scale = 'weekday'; this.step = 1; }
     if (stepHour * 4 > minimumStep) { this.scale = 'hour'; this.step = 4; }
     if (stepHour > minimumStep) { this.scale = 'hour'; this.step = 1; }
     if (stepMinute * 15 > minimumStep) { this.scale = 'minute'; this.step = 15; }
@@ -486,7 +487,7 @@ export class TimeStep {
       minute: 'ddd D MMMM',
       hour: 'ddd D MMMM',
       weekday: 'MMMM YYYY',
-      day: 'MMMM YYYY',
+      day: 'YYYY-MM',
       week: 'MMMM YYYY',
       month: 'YYYY',
       year: '',

@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unused-class-component-members */
 /* eslint-disable style/max-statements-per-line */
+import type { Dayjs } from 'dayjs';
 import type { Body, TimelineOptions } from '../types';
 import dayjs from 'dayjs';
 import { extend, forEach } from 'vis-util/esnext';
@@ -126,11 +127,6 @@ export class TimeAxis extends Component {
     let minimumStep = timeLabelsize - DateUtil.getHiddenDurationBefore(this.body.hiddenDates, this.body.range, timeLabelsize);
     minimumStep -= this.body.util.toTime(0).valueOf();
 
-    // eslint-disable-next-line no-console
-    console.log('start', dayjs(this.body.range.start).format('YYYY-MM-DD HH:mm:ss'));
-    // eslint-disable-next-line no-console
-    console.log('end', dayjs(this.body.range.end).format('YYYY-MM-DD HH:mm:ss'));
-
     const step = new TimeStep(new Date(start), new Date(end), minimumStep, this.body.hiddenDates, {
       showMajorLabels: this.options.showMajorLabels,
       showWeekScale: this.options.showWeekScale,
@@ -146,8 +142,8 @@ export class TimeAxis extends Component {
     dom.majorTexts = [];
     dom.minorTexts = [];
 
-    let current: dayjs.Dayjs;
-    let next: dayjs.Dayjs;
+    let current: Dayjs;
+    let next: Dayjs;
     let x: number;
     let xNext: number;
     let isMajor: boolean;
@@ -161,7 +157,7 @@ export class TimeAxis extends Component {
 
     step.start();
     next = step.getCurrent();
-    xNext = this.body.util.toScreen(next as any);
+    xNext = this.body.util.toScreen(next.valueOf());
     while (step.hasNext() && count < MAX) {
       count++;
 
@@ -173,14 +169,14 @@ export class TimeAxis extends Component {
 
       step.next();
       next = step.getCurrent();
-      xNext = this.body.util.toScreen(next as any);
+      xNext = this.body.util.toScreen(next.valueOf());
 
       prevWidth = width;
       width = xNext - x;
 
       switch (step.scale) {
         case 'week': showMinorGrid = true; break;
-        default: showMinorGrid = (width >= prevWidth * 0.4); break; // prevent displaying of the 31th of the month on a scale of 5 days
+        default: showMinorGrid = (width >= prevWidth * 0.4); break;
       }
 
       if (this.options.showMinorLabels && showMinorGrid) {
@@ -224,42 +220,47 @@ export class TimeAxis extends Component {
   }
 
   _repaintMinorText(x: number, text: string, className: string) {
+    const { prefixCls } = this.body;
     let label = this.dom.redundant.minorTexts.shift();
 
     if (!label) {
-      // create new label
-      const content = document.createTextNode('');
+      const text = document.createElement('div');
       label = document.createElement('div');
-      label.appendChild(content);
+      label.appendChild(text);
       this.dom.foreground.appendChild(label);
     }
-    this.dom.minorTexts.push(label);
-    label.innerHTML = text;
+
+    const textDom = label.firstElementChild;
+    if (textDom) {
+      textDom.innerHTML = text;
+      textDom.className = `${prefixCls}-tick-text`;
+    }
+    label.className = `${prefixCls}-tick ${prefixCls}-minor ${className}`;
 
     const y = this.props.majorLabelHeight;
     this._setXY(label, x, y);
 
-    label.className = `vis-text vis-minor ${className}`;
-
+    this.dom.minorTexts.push(label);
     return label;
   }
 
   _repaintMajorText(x: number, text: string, className: string) {
-    // reuse redundant label
+    const { prefixCls } = this.body;
     let label = this.dom.redundant.majorTexts.shift();
 
     if (!label) {
-      // create label
-      const content = document.createElement('div');
+      const text = document.createElement('div');
       label = document.createElement('div');
-      label.appendChild(content);
+      label.appendChild(text);
       this.dom.foreground.appendChild(label);
     }
 
-    // @ts-expect-error 暂时忽略
-    label.childNodes[0].innerHTML = text;
-    label.className = `vis-text vis-major ${className}`;
-    // label.title = title; // TODO: this is a heavy operation
+    const textDom = label.firstElementChild;
+    if (textDom) {
+      textDom.innerHTML = text;
+      textDom.className = `${prefixCls}-tick-text`;
+    }
+    label.className = `${prefixCls}-tick ${prefixCls}-major ${className}`;
 
     const y = 0;
     this._setXY(label, x, y);
@@ -283,21 +284,22 @@ export class TimeAxis extends Component {
   }
 
   _calculateCharSize() {
+    const { prefixCls } = this.body;
+
     if (!this.dom.measureCharMinor) {
       this.dom.measureCharMinor = document.createElement('div');
-      this.dom.measureCharMinor.className = 'vis-text vis-minor vis-measure';
+      this.dom.measureCharMinor.className = `${prefixCls}-text ${prefixCls}-minor ${prefixCls}-measure`;
       this.dom.measureCharMinor.style.position = 'absolute';
 
       this.dom.measureCharMinor.appendChild(document.createTextNode('0'));
       this.dom.foreground.appendChild(this.dom.measureCharMinor);
     }
-
     this.props.minorCharHeight = this.dom.measureCharMinor.clientHeight;
     this.props.minorCharWidth = this.dom.measureCharMinor.clientWidth;
 
     if (!this.dom.measureCharMajor) {
-      this.dom.measureCharMajor = document.createElement('DIV');
-      this.dom.measureCharMajor.className = 'vis-text vis-major vis-measure';
+      this.dom.measureCharMajor = document.createElement('div');
+      this.dom.measureCharMajor.className = `${prefixCls}-text ${prefixCls}-major ${prefixCls}-measure`;
       this.dom.measureCharMajor.style.position = 'absolute';
 
       this.dom.measureCharMajor.appendChild(document.createTextNode('0'));

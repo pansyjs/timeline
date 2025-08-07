@@ -1,4 +1,3 @@
-import type { Dayjs } from 'dayjs';
 import type { TimeAxis } from './components/TimeAxis';
 import type { HammerInput, HammerManager } from './module/hammer';
 import type { Range } from './Range';
@@ -131,7 +130,7 @@ export class Core {
     this._redraw();
   }
 
-  _toScreen(time: Dayjs) {
+  _toScreen(time: number) {
     return DateUtil.toScreen(this, time, this.props.center.width);
   }
 

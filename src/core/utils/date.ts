@@ -280,7 +280,7 @@ export function toScreen(core: InstanceType<typeof Core>, time: number, width: n
   let conversion;
   if (core.body.hiddenDates.length === 0) {
     conversion = core.range.conversion(width);
-    return (time.valueOf() - conversion.offset) * conversion.scale;
+    return (time - conversion.offset) * conversion.scale;
   }
   else {
     const hidden = getIsHidden(time, core.body.hiddenDates);
